@@ -1,0 +1,226 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RoleType {
+  regular
+  cashier
+  manager
+  superuser
+}
+
+enum TransactionType {
+  purchase
+  redemption
+  adjustment
+  event
+  transfer
+}
+
+enum PromotionType {
+  automatic
+  onetime
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  utorid     String   @unique
+  email      String   @unique
+  password   String
+  name       String
+  role       RoleType @default(regular)
+  verified   Boolean  @default(false)
+  suspicious Boolean  @default(false)
+  points     Int      @default(0)
+
+  birthday  DateTime?
+  avatarUrl String?
+
+  createdAt DateTime  @default(now())
+  lastLogin DateTime?
+
+  // relations
+  createdTransactions      Transaction[] @relation("CreatedBy")
+  ownedTransactions        Transaction[] @relation("OwnedBy")
+  processedRedemptions     Transaction[] @relation("ProcessedBy")
+  counterpartyTransactions Transaction[] @relation("TxCounterparty")
+
+  organizing EventOrganizer[]
+  guesting   EventGuest[]
+
+  promotionUsages PromotionUsage[]
+  resets          PasswordReset[]
+
+  @@index([name])    
+  @@index([role])
+  @@index([verified])
+  @@index([suspicious])
+}
+
+model PasswordReset {
+  id         Int       @id @default(autoincrement())
+  token      String    @unique
+  purpose    String // "activation" | "reset"
+  expiresAt  DateTime
+  consumedAt DateTime?
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// Promotions
+model Promotion {
+  id          Int           @id @default(autoincrement())
+  name        String
+  description String
+  type        PromotionType
+  startTime   DateTime
+  endTime     DateTime
+
+  minSpending Float?
+  rate        Float?
+  points      Int?
+
+  appliedTo TransactionPromotion[]
+  usages    PromotionUsage[]
+
+  @@index([name])
+  @@index([type])
+  @@index([startTime])
+  @@index([endTime])
+}
+
+model PromotionUsage {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  promotionId   Int
+  usedAt        DateTime?
+  transactionId Int?
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promotion   Promotion    @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  transaction Transaction? @relation("PromotionUsageTransaction", fields: [transactionId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, promotionId])
+  @@index([transactionId])
+}
+
+model Event {
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String
+  location      String
+  startTime     DateTime
+  endTime       DateTime
+  capacity      Int?
+  pointsTotal   Int
+  pointsRemain  Int
+  pointsAwarded Int      @default(0)
+  published     Boolean  @default(false)
+
+  organizers   EventOrganizer[]
+  guests       EventGuest[]
+  transactions Transaction[]
+
+  @@index([name])
+  @@index([location])
+  @@index([startTime])
+  @@index([endTime])
+  @@index([published])
+}
+
+model EventOrganizer {
+  eventId Int
+  userId  Int
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, userId])
+  @@index([userId])
+}
+
+model EventGuest {
+  eventId   Int
+  userId    Int
+  rsvped    Boolean @default(true)
+  confirmed Boolean @default(false)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, userId])
+  @@index([userId])
+  @@index([confirmed])
+}
+
+model Transaction {
+  id         Int             @id @default(autoincrement())
+  type       TransactionType
+  amount     Int
+  spent      Float?
+  redeemed   Int?
+  suspicious Boolean         @default(false)
+  remark     String?
+
+  // account affected
+  userId Int
+  user   User @relation("OwnedBy", fields: [userId], references: [id], onDelete: Cascade)
+
+  // who created it
+  createdById Int?
+  createdBy   User? @relation("CreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  // redemption processing
+  processed     Boolean   @default(false)
+  processedAt   DateTime?
+  processedById Int?
+  processedBy   User?     @relation("ProcessedBy", fields: [processedById], references: [id], onDelete: SetNull)
+
+  // adjustments
+  relatedTransactionId Int?
+  relatedTransaction   Transaction?  @relation("TxAdjusts", fields: [relatedTransactionId], references: [id], onDelete: SetNull)
+  adjustsOf            Transaction[] @relation("TxAdjusts")
+
+  // transfers 
+  relatedUserId Int?
+  relatedUser   User? @relation("TxCounterparty", fields: [relatedUserId], references: [id], onDelete: SetNull)
+
+  // event awards
+  eventId Int?
+  event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  // promotions
+  promotions      TransactionPromotion[]
+  promotionUsages PromotionUsage[]       @relation("PromotionUsageTransaction")
+
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([userId])
+  @@index([createdById])
+  @@index([processed, processedById])
+  @@index([eventId])
+  @@index([relatedTransactionId])
+  @@index([relatedUserId])
+}
+
+model TransactionPromotion {
+  transactionId Int
+  promotionId   Int
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  promotion   Promotion   @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  @@id([transactionId, promotionId])
+  @@index([promotionId])
+}
