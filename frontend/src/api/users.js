@@ -29,8 +29,28 @@ export async function getMe() {
 
 // Self update: PATCH /users/me
 export async function updateMe(payload) {
-  // name?, email?, birthday?, avatar? (later you may need FormData)
-  const res = await api.patch("/users/me", payload);
+  // name?, email?, birthday?, avatar?
+  const hasFile =
+    payload instanceof FormData ||
+    Object.values(payload || {}).some(
+      (value) => value instanceof File || value instanceof Blob
+    );
+
+  let body = payload || {};
+
+  if (hasFile && !(payload instanceof FormData)) {
+    const formData = new FormData();
+    Object.entries(payload || {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value);
+      }
+    });
+    body = formData;
+  }
+
+  const res = await api.patch("/users/me", body, {
+    headers: hasFile ? { "Content-Type": "multipart/form-data" } : undefined,
+  });
   return res.data;
 }
 

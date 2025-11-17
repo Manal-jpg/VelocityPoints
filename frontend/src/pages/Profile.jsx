@@ -29,7 +29,12 @@ export default function Profile() {
   const initials = getInitials(user?.name, user?.utorid);
 
   const settings = [
-    { icon: User, label: "Account Information", hasChevron: true },
+    {
+      icon: User,
+      label: "Account Information",
+      hasChevron: true,
+      onClick: () => navigate("/account"),
+    },
     { icon: Smartphone, label: "Switch Interface", hasChevron: true },
     { icon: Shield, label: "Password & Security", hasChevron: true },
     { icon: Bell, label: "Notification Settings", hasChevron: true },
@@ -195,6 +200,7 @@ export default function Profile() {
                     : ""
                 }`}
                 type="button"
+                onClick={setting.onClick}
               >
                 <div className="flex items-center gap-3">
                   <Icon

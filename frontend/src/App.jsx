@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Profile from "./pages/Profile.jsx";
+import AccountInfo from "./pages/AccountInfo.jsx";
 import { useAuth } from "./hooks/useAuth";
 
 function PublicRoute({ children }) {
@@ -40,6 +41,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account"
+          element={
+            <ProtectedRoute>
+              <AccountInfo />
             </ProtectedRoute>
           }
         />
