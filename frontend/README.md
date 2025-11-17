@@ -1,16 +1,194 @@
-# React + Vite
+# Frontend Progress Update — Summary of My Work
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Here’s everything I completed today on the frontend, along with a clear explanation of how the codebase is structured so you can easily understand and continue building on top of it.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✅ Project Setup
 
-## React Compiler
+The project now uses:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Vite + React**
+- **TailwindCSS v4** for styling
+- **React Router** for page routing
+- **Lucide-react** for icons
+- A global **Auth Context** system for login and storing the current user
+- A fully responsive layout (Sidebar, TopBar, Bottom Navigation)
 
-## Expanding the ESLint configuration
+Everything is already configured and working together.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+To run the project:
+
+```bash
+npm install
+npm run dev
+```
+
+---
+
+## ✅ Global Styles
+
+The default Vite CSS has been replaced with a much cleaner `index.css` that uses Tailwind and global theme tokens.
+
+- No more forced dark background
+- No default Vite button styles
+- Global font + spacing system added
+- Scrollbars styled
+- Inputs/buttons use consistent shadows and focus rings
+
+Everything now visually matches the Figma style guide.
+
+---
+
+## ✅ Authentication System
+
+I implemented the full authentication structure:
+
+### **Files involved**
+
+- `src/context/AuthContext.js`
+- `src/context/AuthProvider.jsx`
+- `src/hooks/useAuth.js`
+
+### **How it works**
+
+- The login page calls `login()`, which:
+  - Sends credentials to `POST /auth/tokens`
+  - Saves the token in `localStorage`
+  - Fetches the user from `/users/me`
+  - Stores the user globally so all components can access it
+- The app automatically loads the current user on refresh
+- `useAuth()` can be used in any page or component to access:
+  - `user`
+  - `loading`
+  - `login()`
+  - `logout()`
+
+---
+
+## ✅ Login Page
+
+The login page is located at:
+
+```
+src/pages/Login.jsx
+```
+
+It includes:
+
+- Figma-accurate design
+- UTORid + password fields
+- Error handling
+- Desktop and mobile layouts
+- Automatic redirect if already logged in
+
+---
+
+## ✅ Navigation Layout
+
+I implemented a complete layout system based on our Figma:
+
+### **Sidebar (desktop)**
+
+```
+src/components/layout/Sidebar.jsx
+```
+
+### **Bottom Navigation (mobile)**
+
+```
+src/components/layout/BottomNav.jsx
+```
+
+### **Top Bar**
+
+```
+src/components/layout/TopBar.jsx
+```
+
+### **Shared nav items**
+
+```
+src/components/layout/navItems.js
+```
+
+### **Unified layout wrapper**
+
+```
+src/components/layout/AppLayout.jsx
+```
+
+Any page wrapped with `AppLayout` will automatically get:
+
+- Sidebar on desktop
+- Top bar on all screen sizes
+- Mobile bottom nav for small screens
+
+Example:
+
+```jsx
+<AppLayout title="Transactions">{/* Page content here */}</AppLayout>
+```
+
+---
+
+## ✅ Routing
+
+Routes live in:
+
+```
+src/App.jsx
+```
+
+I added the login route and the layout structure is ready for the rest of the pages.  
+Adding a new page only requires:
+
+1. Creating a file in `src/pages/`
+2. Adding a route in `App.jsx`
+
+---
+
+## 🧱 Folder Structure (for reference)
+
+```
+src/
+  api/
+    auth.js
+    users.js
+  components/
+    layout/
+      Sidebar.jsx
+      BottomNav.jsx
+      TopBar.jsx
+      AppLayout.jsx
+      navItems.js
+  context/
+    AuthContext.js
+    AuthProvider.jsx
+  hooks/
+    useAuth.js
+  pages/
+    Login.jsx
+    ...
+  App.jsx
+  main.jsx
+  index.css
+```
+
+---
+
+## ✅ Summary
+
+All foundation-level work is now complete:
+
+- Project structure
+- Authentication
+- Login UI
+- Navigation system
+- Layout system
+- Routing
+- Global styles
+
+Everything is ready for additional pages to be added cleanly and consistently.
+
+If you need help understanding any part of the setup, feel free to ask me anytime.
