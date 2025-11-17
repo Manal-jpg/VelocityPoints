@@ -42,7 +42,7 @@ Everything now visually matches the Figma style guide.
 
 ## ✅ Authentication System
 
-I implemented the full authentication structure:
+I implemented the full authentication structure (to test it, make sure your backend is also running):
 
 ### **Files involved**
 
