@@ -13,6 +13,10 @@ import { useState } from "react";
 import { AppLayout } from "../components/layout/Layout";
 import { useAuth } from "../hooks/useAuth";
 
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000"
+).replace(/\/$/, "");
+
 const getInitials = (name, utorid) => {
   const source = name || utorid || "";
   if (!source) return "??";
@@ -27,6 +31,9 @@ export default function Profile() {
   const [confirming, setConfirming] = useState(false);
 
   const initials = getInitials(user?.name, user?.utorid);
+  const avatarUrl = user?.avatarUrl
+    ? `${API_BASE_URL}${user.avatarUrl}`
+    : null;
 
   const settings = [
     {
@@ -60,9 +67,17 @@ export default function Profile() {
               className="w-[120px] h-[120px] rounded-full bg-gradient-to-br from-[#00a862] to-[#00d477] flex items-center justify-center text-white border-4 border-[#e6f7f0]"
               style={{ boxShadow: "0 10px 15px rgba(0, 168, 98, 0.15)" }}
             >
-              <span className="text-[40px]" style={{ fontWeight: 700 }}>
-                {initials}
-              </span>
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Profile"
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <span className="text-[40px]" style={{ fontWeight: 700 }}>
+                  {initials}
+                </span>
+              )}
             </div>
           </div>
 

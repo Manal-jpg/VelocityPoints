@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
       try {
         const me = await fetchCurrentUser();
         setUser(me);
+        localStorage.setItem("authUserProfile", JSON.stringify(me));
       } catch (e) {
         console.error(e);
         localStorage.removeItem("authToken");
@@ -36,6 +37,7 @@ export function AuthProvider({ children }) {
 
       const me = await fetchCurrentUser();
       setUser(me);
+      localStorage.setItem("authUserProfile", JSON.stringify(me));
     } catch (e) {
       console.error(e);
       setError("Login failed. Check your UTORid or password.");
@@ -47,6 +49,12 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("authToken");
     setUser(null);
   };
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("authUserProfile", JSON.stringify(user));
+    }
+  }, [user]);
 
   const value = { user, loading, error, login, logout, setUser };
 

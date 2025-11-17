@@ -1,7 +1,19 @@
 // src/pages/Login.jsx
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000"
+).replace(/\/$/, "");
+
+const getInitials = (name, utorid) => {
+  const source = name || utorid || "";
+  if (!source) return "??";
+  const parts = source.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
 
 export default function Login() {
   const { user, login, error } = useAuth();
@@ -11,6 +23,23 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [localError, setLocalError] = useState(null);
+
+  const storedProfile = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("authUserProfile");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const storedAvatarUrl = storedProfile?.avatarUrl
+    ? `${API_BASE_URL}${storedProfile.avatarUrl}`
+    : null;
+  const storedInitials = getInitials(
+    storedProfile?.name,
+    storedProfile?.utorid
+  );
 
   // If already logged in, send to main dashboard
   if (user) {
@@ -86,6 +115,28 @@ export default function Login() {
                 PointsVelocity
               </span>
             </div>
+
+            {storedProfile && (
+              <div className="mb-6 inline-flex items-center gap-3 rounded-2xl bg-slate-50 border border-slate-100 px-3 py-2">
+                <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-semibold overflow-hidden">
+                  {storedAvatarUrl ? (
+                    <img
+                      src={storedAvatarUrl}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span>{storedInitials}</span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm text-slate-900 font-semibold leading-tight">
+                    {storedProfile.name || storedProfile.utorid || "Welcome"}
+                  </p>
+                  <p className="text-xs text-slate-500">Welcome back</p>
+                </div>
+              </div>
+            )}
 
             <div className="bg-white rounded-3xl shadow-sm border border-slate-100 px-8 py-10">
               <h2 className="text-2xl font-semibold text-slate-900">Sign in</h2>
