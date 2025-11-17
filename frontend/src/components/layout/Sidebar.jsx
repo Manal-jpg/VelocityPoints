@@ -1,9 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { Settings, Star } from "lucide-react";
-import { navItems } from "./navItems";
+import { getNavItems } from "./navItems";
+import { useAuth } from "../../hooks/useAuth";
 
 export function Sidebar() {
   const location = useLocation();
+  const { user } = useAuth();
+  const navItems = getNavItems(user);
 
   return (
     <aside className="hidden md:flex fixed left-0 top-0 h-screen w-[240px] bg-white border-r border-[#f4f4f5] flex-col">
