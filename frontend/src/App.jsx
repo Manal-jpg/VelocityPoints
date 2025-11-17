@@ -4,6 +4,7 @@ import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Profile from "./pages/Profile.jsx";
 import AccountInfo from "./pages/AccountInfo.jsx";
+import ChangePassword from "./pages/ChangePassword.jsx";
 import { useAuth } from "./hooks/useAuth";
 
 function PublicRoute({ children }) {
@@ -49,6 +50,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <AccountInfo />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/password"
+          element={
+            <ProtectedRoute>
+              <ChangePassword />
             </ProtectedRoute>
           }
         />

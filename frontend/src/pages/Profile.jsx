@@ -43,7 +43,12 @@ export default function Profile() {
       onClick: () => navigate("/account"),
     },
     { icon: Smartphone, label: "Switch Interface", hasChevron: true },
-    { icon: Shield, label: "Password & Security", hasChevron: true },
+    {
+      icon: Shield,
+      label: "Password & Security",
+      hasChevron: true,
+      onClick: () => navigate("/password"),
+    },
     { icon: Bell, label: "Notification Settings", hasChevron: true },
   ];
 
@@ -209,7 +214,7 @@ export default function Profile() {
             return (
               <button
                 key={setting.label}
-                className={`w-full flex items-center justify-between px-6 h-14 hover:bg-[#fafaf9] transition-all ${
+                className={`w-full flex items-center justify-between px-6 h-14 transition-all hover:bg-[#f9fafb] hover:shadow-[0_8px_20px_rgba(0,0,0,0.04)] hover:-translate-y-[1px] ${
                   index !== settings.length - 1
                     ? "border-b border-[#f4f4f5]"
                     : ""
