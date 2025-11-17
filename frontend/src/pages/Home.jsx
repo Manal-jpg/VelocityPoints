@@ -1,3 +1,9 @@
+import { AppLayout } from "../components/layout/Layout";
+
 export default function Home() {
-  return <h1>Home Page</h1>;
+  return (
+    <AppLayout title="Home">
+      <div></div>
+    </AppLayout>
+  );
 }
