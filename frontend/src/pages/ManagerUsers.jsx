@@ -6,11 +6,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  Plus,
   Search,
   Shield,
+  X,
 } from "lucide-react";
 import { AppLayout } from "../components/layout/Layout";
-import { listUsers } from "../api/users";
+import { createUser, listUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 
 const roleOptions = [
@@ -79,6 +81,16 @@ export default function ManagerUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [showCreate, setShowCreate] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    utorid: "",
+    name: "",
+    email: "",
+  });
+  const [createError, setCreateError] = useState("");
+  const [createSuccess, setCreateSuccess] = useState("");
+  const [createLoading, setCreateLoading] = useState(false);
 
   useEffect(() => {
     if (authLoading || !canView) return;
@@ -111,7 +123,7 @@ export default function ManagerUsers() {
     return () => {
       cancelled = true;
     };
-  }, [page, limit, filters, canView, authLoading]);
+  }, [page, limit, filters, canView, authLoading, refreshKey]);
 
   const sortedUsers = useMemo(() => {
     const sorted = [...users];
@@ -149,6 +161,53 @@ export default function ManagerUsers() {
   const resetFilters = () => {
     setFilters({ search: "", role: "", verified: "", activated: "" });
     setPage(1);
+  };
+
+  const handleOpenCreate = () => {
+    setShowCreate(true);
+    setCreateError("");
+    setCreateSuccess("");
+  };
+
+  const handleCloseCreate = () => {
+    setShowCreate(false);
+    setCreateForm({ utorid: "", name: "", email: "" });
+    setCreateError("");
+    setCreateSuccess("");
+  };
+
+  const handleCreateSubmit = async (e) => {
+    e.preventDefault();
+    const utorid = createForm.utorid.trim();
+    const name = createForm.name.trim();
+    const email = createForm.email.trim();
+
+    if (!utorid || !name || !email) {
+      setCreateError("UTORid, name, and email are required.");
+      setCreateSuccess("");
+      return;
+    }
+
+    setCreateLoading(true);
+    setCreateError("");
+    setCreateSuccess("");
+
+    try {
+      await createUser({ utorid, name, email });
+      setCreateSuccess("User registered successfully.");
+      setCreateForm({ utorid: "", name: "", email: "" });
+      setPage(1);
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      console.error(err);
+      const apiMsg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Unable to register user. Please try again.";
+      setCreateError(apiMsg);
+    } finally {
+      setCreateLoading(false);
+    }
   };
 
   return (
@@ -198,6 +257,16 @@ export default function ManagerUsers() {
                 >
                   Reset
                 </button>
+                {canView && (
+                  <button
+                    type="button"
+                    onClick={handleOpenCreate}
+                    className="h-11 px-4 rounded-xl bg-[#00a862] text-sm text-white hover:bg-[#0c9158] flex items-center gap-2"
+                  >
+                    <Plus size={16} />
+                    Register user
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -398,6 +467,118 @@ export default function ManagerUsers() {
           </div>
         </div>
       </div>
+
+      {showCreate && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={handleCloseCreate}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#f4f4f5] px-5 py-4">
+              <div>
+                <p className="text-sm text-[#71717a]">Register a new user</p>
+                <h3
+                  className="text-lg text-[#18181b]"
+                  style={{ fontWeight: 600 }}
+                >
+                  Add UTORid access
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={handleCloseCreate}
+                className="p-2 rounded-lg text-[#71717a] hover:bg-[#f4f4f5]"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form className="px-5 py-4 space-y-4" onSubmit={handleCreateSubmit}>
+              <div className="space-y-1">
+                <label className="text-sm text-[#3f3f46]">UTORid</label>
+                <input
+                  type="text"
+                  value={createForm.utorid}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      utorid: e.target.value,
+                    }))
+                  }
+                  placeholder="e.g. jsmith"
+                  className="w-full h-11 rounded-xl border border-[#e4e4e7] px-3 text-sm focus:border-[#00a862] focus:outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm text-[#3f3f46]">Full name</label>
+                <input
+                  type="text"
+                  value={createForm.name}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  placeholder="Jane Smith"
+                  className="w-full h-11 rounded-xl border border-[#e4e4e7] px-3 text-sm focus:border-[#00a862] focus:outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm text-[#3f3f46]">Email</label>
+                <input
+                  type="email"
+                  value={createForm.email}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      email: e.target.value,
+                    }))
+                  }
+                  placeholder="name@example.com"
+                  className="w-full h-11 rounded-xl border border-[#e4e4e7] px-3 text-sm focus:border-[#00a862] focus:outline-none"
+                />
+              </div>
+
+              {createError && (
+                <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  <AlertCircle size={16} />
+                  <span>{createError}</span>
+                </div>
+              )}
+
+              {createSuccess && (
+                <div className="flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                  <CheckCircle2 size={16} />
+                  <span>{createSuccess}</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={handleCloseCreate}
+                  className="h-11 px-4 rounded-xl border border-[#e4e4e7] text-sm text-[#18181b] hover:bg-[#f9fafb]"
+                  disabled={createLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={createLoading}
+                  className="h-11 px-4 rounded-xl bg-[#00a862] text-sm text-white hover:bg-[#0c9158] flex items-center gap-2 disabled:opacity-70"
+                >
+                  {createLoading && (
+                    <Loader2 className="animate-spin" size={16} />
+                  )}
+                  Register
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }
