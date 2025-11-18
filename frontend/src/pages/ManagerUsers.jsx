@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Loader2,
   Plus,
+  Pencil,
   Search,
   Shield,
   X,
@@ -14,6 +15,7 @@ import {
 import { AppLayout } from "../components/layout/Layout";
 import { createUser, listUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
+import { updateUserById } from "../api/users";
 
 const roleOptions = [
   { label: "All roles", value: "" },
@@ -67,6 +69,23 @@ export default function ManagerUsers() {
   const { user, loading: authLoading } = useAuth();
   const roleSet = useMemo(() => toRoleSet(user), [user]);
   const canView = roleSet.has("manager") || roleSet.has("superuser");
+  const roleEditOptions = useMemo(() => {
+    if (roleSet.has("superuser")) {
+      return [
+        { label: "Regular", value: "regular" },
+        { label: "Cashier", value: "cashier" },
+        { label: "Manager", value: "manager" },
+        { label: "Superuser", value: "superuser" },
+      ];
+    }
+    if (roleSet.has("manager")) {
+      return [
+        { label: "Regular", value: "regular" },
+        { label: "Cashier", value: "cashier" },
+      ];
+    }
+    return [];
+  }, [roleSet]);
 
   const [filters, setFilters] = useState({
     search: "",
@@ -91,6 +110,11 @@ export default function ManagerUsers() {
   const [createError, setCreateError] = useState("");
   const [createSuccess, setCreateSuccess] = useState("");
   const [createLoading, setCreateLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [editForm, setEditForm] = useState({ verified: false, role: "" });
+  const [editError, setEditError] = useState("");
+  const [editSuccess, setEditSuccess] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
     if (authLoading || !canView) return;
@@ -210,6 +234,54 @@ export default function ManagerUsers() {
     }
   };
 
+  const handleOpenEdit = (userToEdit) => {
+    setSelectedUser(userToEdit);
+    setEditForm({
+      verified: Boolean(userToEdit?.verified),
+      role: userToEdit?.role || "",
+    });
+    setEditError("");
+    setEditSuccess("");
+  };
+
+  const handleCloseEdit = () => {
+    setSelectedUser(null);
+    setEditForm({ verified: false, role: "" });
+    setEditError("");
+    setEditSuccess("");
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedUser) return;
+
+    const payload = { verified: Boolean(editForm.verified) };
+
+    // Only include role changes if the current user has permission.
+    if (roleEditOptions.length && editForm.role) {
+      payload.role = editForm.role;
+    }
+
+    setEditLoading(true);
+    setEditError("");
+    setEditSuccess("");
+
+    try {
+      await updateUserById(selectedUser.id, payload);
+      setEditSuccess("User updated successfully.");
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      console.error(err);
+      const apiMsg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Unable to update user.";
+      setEditError(apiMsg);
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
   return (
     <AppLayout title="Users">
       <div className="space-y-5">
@@ -225,7 +297,7 @@ export default function ManagerUsers() {
               </h2>
             </div>
             <div className="flex flex-col gap-3 md:flex-row md:items-center">
-              <div className="relative w-full md:w-[320px]">
+              <div className="relative w-full min-w-0 md:w-[320px]">
                 <Search
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-[#a1a1aa]"
                   size={18}
@@ -238,7 +310,7 @@ export default function ManagerUsers() {
                   className="w-full h-11 pl-10 pr-3 rounded-xl border border-[#e4e4e7] bg-white text-sm focus:border-[#00a862] focus:outline-none"
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -261,7 +333,7 @@ export default function ManagerUsers() {
                   <button
                     type="button"
                     onClick={handleOpenCreate}
-                    className="h-11 px-4 rounded-xl bg-[#00a862] text-sm text-white hover:bg-[#0c9158] flex items-center gap-2"
+                    className="h-11 px-4 rounded-xl bg-[#00a862] text-sm text-white hover:bg-[#0c9158] flex items-center gap-2 shrink-0"
                   >
                     <Plus size={16} />
                     Register user
@@ -346,6 +418,7 @@ export default function ManagerUsers() {
                   <th className="px-6 py-3 font-medium">Status</th>
                   <th className="px-6 py-3 font-medium">Activity</th>
                   <th className="px-6 py-3 font-medium text-right">Points</th>
+                  <th className="px-6 py-3 font-medium text-right">Manage</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f4f4f5] text-[#18181b]">
@@ -400,6 +473,16 @@ export default function ManagerUsers() {
                     </td>
                     <td className="px-6 py-4 text-right font-semibold">
                       {(u.points ?? 0).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(u)}
+                        className="inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-[#e4e4e7] text-sm text-[#18181b] hover:bg-[#f9fafb]"
+                      >
+                        <Pencil size={15} />
+                        Edit
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -573,6 +656,119 @@ export default function ManagerUsers() {
                     <Loader2 className="animate-spin" size={16} />
                   )}
                   Register
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {selectedUser && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={handleCloseEdit}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#f4f4f5] px-5 py-4">
+              <div>
+                <p className="text-sm text-[#71717a]">
+                  Update user: @{selectedUser.utorid}
+                </p>
+                <h3
+                  className="text-lg text-[#18181b]"
+                  style={{ fontWeight: 600 }}
+                >
+                  {selectedUser.name || "Unnamed user"}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={handleCloseEdit}
+                className="p-2 rounded-lg text-[#71717a] hover:bg-[#f4f4f5]"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form className="px-5 py-4 space-y-4" onSubmit={handleEditSubmit}>
+              <div className="flex items-center gap-3">
+                <input
+                  id="verified"
+                  type="checkbox"
+                  checked={Boolean(editForm.verified)}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      verified: e.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 rounded border-[#e4e4e7] text-[#00a862] focus:ring-[#00a862]"
+                />
+                <label htmlFor="verified" className="text-sm text-[#3f3f46]">
+                  Mark as verified
+                </label>
+              </div>
+
+              {roleEditOptions.length > 0 && (
+                <div className="space-y-1">
+                  <label className="text-sm text-[#3f3f46]">Role</label>
+                  <select
+                    value={editForm.role}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, role: e.target.value }))
+                    }
+                    className="h-11 w-full rounded-xl border border-[#e4e4e7] bg-white px-3 text-sm focus:border-[#00a862] focus:outline-none"
+                  >
+                    {roleEditOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  {!roleSet.has("superuser") && (
+                    <p className="text-xs text-[#71717a]">
+                      Managers can promote up to Cashier.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {editError && (
+                <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  <AlertCircle size={16} />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              {editSuccess && (
+                <div className="flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                  <CheckCircle2 size={16} />
+                  <span>{editSuccess}</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={handleCloseEdit}
+                  className="h-11 px-4 rounded-xl border border-[#e4e4e7] text-sm text-[#18181b] hover:bg-[#f9fafb]"
+                  disabled={editLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editLoading}
+                  className="h-11 px-4 rounded-xl bg-[#00a862] text-sm text-white hover:bg-[#0c9158] flex items-center gap-2 disabled:opacity-70"
+                >
+                  {editLoading && (
+                    <Loader2 className="animate-spin" size={16} />
+                  )}
+                  Save changes
                 </button>
               </div>
             </form>
