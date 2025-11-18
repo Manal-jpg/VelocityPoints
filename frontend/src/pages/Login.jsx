@@ -1,7 +1,8 @@
 // src/pages/Login.jsx
 import { useMemo, useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { requestPasswordReset } from "../api/auth";
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000"
@@ -23,6 +24,9 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [localError, setLocalError] = useState(null);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState("");
+  const [resetInfo, setResetInfo] = useState(null);
 
   const storedProfile = useMemo(() => {
     try {
@@ -63,6 +67,31 @@ export default function Login() {
       // context `error` is already set by login()
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleReset = async () => {
+    if (!utorid.trim()) {
+      setResetError("Please enter your UTORid first.");
+      setResetInfo(null);
+      return;
+    }
+
+    setResetLoading(true);
+    setResetError("");
+    setResetInfo(null);
+    try {
+      const data = await requestPasswordReset({ utorid: utorid.trim() });
+      setResetInfo(data);
+    } catch (e) {
+      console.error(e);
+      setResetError(
+        e?.response?.data?.message ||
+          e?.response?.data?.error ||
+          "Unable to send reset token."
+      );
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -144,11 +173,30 @@ export default function Login() {
                 Use your assigned UTORid and password to access the portal.
               </p>
 
-              {(localError || error) && (
-                <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                  {localError || error}
-                </div>
-              )}
+            {(localError || error) && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {localError || error}
+              </div>
+            )}
+            {resetError && (
+              <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {resetError}
+              </div>
+            )}
+            {resetInfo && (
+              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800">
+                <p className="font-semibold">Reset token generated</p>
+                <p className="break-all text-slate-700">{resetInfo.resetToken}</p>
+                {resetInfo.expiresAt && (
+                  <p className="text-xs text-slate-500 mt-1">
+                    Expires: {new Date(resetInfo.expiresAt).toLocaleString()}
+                  </p>
+                )}
+                <p className="text-xs text-slate-500 mt-2">
+                  Paste this token on the reset page to set a new password.
+                </p>
+              </div>
+            )}
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div>
@@ -187,17 +235,30 @@ export default function Login() {
                   />
                 </div>
 
-                <p className="text-xs text-slate-500">
-                  Having trouble logging in? Contact a manager.
-                </p>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-emerald-300"
-                >
-                  {submitting ? "Signing in..." : "Sign in"}
-                </button>
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="inline-flex w-full items-center justify-center rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-emerald-300"
+                  >
+                    {submitting ? "Signing in..." : "Sign in"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    disabled={resetLoading}
+                    className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {resetLoading ? "Sending reset..." : "Forgot password?"}
+                  </button>
+                  <p className="text-xs text-slate-500 text-center">
+                    Already have a token?{" "}
+                    <Link to="/reset" className="text-emerald-600 hover:underline">
+                      Go to reset page
+                    </Link>
+                    .
+                  </p>
+                </div>
               </form>
             </div>
           </div>

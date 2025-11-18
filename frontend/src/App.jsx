@@ -6,6 +6,7 @@ import Profile from "./pages/Profile.jsx";
 import AccountInfo from "./pages/AccountInfo.jsx";
 import ChangePassword from "./pages/ChangePassword.jsx";
 import ManagerUsers from "./pages/ManagerUsers.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
 import { useAuth } from "./hooks/useAuth";
 
 function PublicRoute({ children }) {
@@ -70,6 +71,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/reset" element={<ResetPassword />} />
         <Route
           path="/manager/users"
           element={
