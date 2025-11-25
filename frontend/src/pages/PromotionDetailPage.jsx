@@ -125,13 +125,14 @@
 // }
 
 import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   getPromotion,
   updatePromotion,
   deletePromotion,
 } from "../api/promotions";
 import PromotionForm from "../components/promotions/PromotionForm";
-import { useNavigate, useParams } from "react-router-dom";
+import { AppLayout } from "../components/layout/Layout";
 
 export default function PromotionDetailPage() {
   const { id } = useParams();
@@ -192,52 +193,59 @@ export default function PromotionDetailPage() {
     }
   }
 
-  if (loading) return <div className="p-4">Loading...</div>;
+  if (loading)
+    return (
+      <AppLayout title="Edit Promotion">
+        <div className="p-4 text-sm text-slate-600">Loading...</div>
+      </AppLayout>
+    );
   if (loadError)
     return (
-      <div className="p-4 text-sm text-red-600">
-        {loadError}
-      </div>
+      <AppLayout title="Edit Promotion">
+        <div className="p-4 text-sm text-red-600">{loadError}</div>
+      </AppLayout>
     );
   if (!promo)
-    return <div className="p-4 text-sm">Promotion not found.</div>;
+    return (
+      <AppLayout title="Edit Promotion">
+        <div className="p-4 text-sm">Promotion not found.</div>
+      </AppLayout>
+    );
 
   return (
-    <div className="p-4 space-y-4">
-      
-      <div className="flex items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold">Edit Promotion</h1>
-        <button
-          className="px-3 py-1.5 rounded bg-red-600 text-white text-sm disabled:opacity-50"
-          onClick={handleDelete}
-          disabled={deleteLoading}
-        >
-          {deleteLoading ? "Deleting..." : "Delete"}
-        </button>
+    <AppLayout title="Edit Promotion">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl font-semibold text-slate-900">Edit Promotion</h1>
+          <button
+            className="px-3 py-1.5 rounded bg-red-600 text-white text-sm disabled:opacity-50"
+            onClick={handleDelete}
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? "Deleting..." : "Delete"}
+          </button>
+        </div>
+
+        {deleteError && (
+          <p className="text-sm text-red-600">{deleteError}</p>
+        )}
+
+        <PromotionForm
+          initialData={promo}
+          onSubmit={handleUpdate}
+          submitLabel="Save Changes"
+        />
+
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={() => navigate("/manager/promotions")}
+            className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white shadow-sm hover:bg-slate-50"
+          >
+            ← Back to Promotions
+          </button>
+        </div>
       </div>
-
-      {deleteError && (
-        <p className="text-sm text-red-600">{deleteError}</p>
-      )}
-
-      <PromotionForm
-        initialData={promo}
-        onSubmit={handleUpdate}
-        submitLabel="Save Changes"
-      />
-
-      {/* BACK BUTTON */}
-      <div className="pt-2">
-        <button
-          type="button"
-          onClick={() => navigate("/manager/promotions")}
-          className="px-4 py-1.5 border rounded text-sm bg-gray-100 hover:bg-gray-200"
-        >
-          ← Back to Promotions
-        </button>
-      </div>
-
-    </div>
+    </AppLayout>
   );
 }
-
