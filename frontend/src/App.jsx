@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import {Navigate, Route, Routes} from "react-router-dom";
 
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
@@ -7,81 +7,92 @@ import AccountInfo from "./pages/AccountInfo.jsx";
 import ChangePassword from "./pages/ChangePassword.jsx";
 import ManagerUsers from "./pages/ManagerUsers.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
-import { useAuth } from "./hooks/useAuth";
+import Transactions from "./pages/transactions.jsx";
+import {useAuth} from "./hooks/useAuth";
 
-function PublicRoute({ children }) {
-  const { user, loading } = useAuth();
+function PublicRoute({children}) {
+    const {user, loading} = useAuth();
 
-  if (loading) return null;
-  if (user) return <Navigate to="/" replace />;
+    if (loading) return null;
+    if (user) return <Navigate to="/" replace/>;
 
-  return children;
+    return children;
 }
 
-function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+function ProtectedRoute({children}) {
+    const {user, loading} = useAuth();
 
-  if (loading) return null;
-  if (!user) return <Navigate to="/login" replace />;
+    if (loading) return null;
+    if (!user) return <Navigate to="/login" replace/>;
 
-  return children;
+    return children;
 }
 
 export default function App() {
-  return (
-    <>
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/account"
-          element={
-            <ProtectedRoute>
-              <AccountInfo />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/password"
-          element={
-            <ProtectedRoute>
-              <ChangePassword />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/reset" element={<ResetPassword />} />
-        <Route
-          path="/manager/users"
-          element={
-            <ProtectedRoute>
-              <ManagerUsers />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-        {/* <Route
+    return (
+        <>
+            <Routes>
+                <Route
+                    path="/login"
+                    element={
+                        <PublicRoute>
+                            <Login/>
+                        </PublicRoute>
+                    }
+                />
+                <Route
+                    path="/"
+                    element={
+                        <ProtectedRoute>
+                            <Home/>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/account"
+                    element={
+                        <ProtectedRoute>
+                            <AccountInfo/>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/password"
+                    element={
+                        <ProtectedRoute>
+                            <ChangePassword/>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <Profile/>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route path="/reset" element={<ResetPassword/>}/>
+                <Route
+                    path="/manager/users"
+                    element={
+                        <ProtectedRoute>
+                            <ManagerUsers/>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/transactions"
+                    element={
+                        <ProtectedRoute>
+                            <Transactions />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route path="*" element={<Navigate to="/" replace/>}/>
+
+
+                {/* <Route
           path="/profile"
           element={
             <ProtectedRoute>
@@ -124,7 +135,7 @@ export default function App() {
 
       <Route path="/manager/users" element={<ManagerUsers />} />
       <Route path="/manager/transactions" element={<ManagerTransactions />} /> */}
-      </Routes>
-    </>
-  );
+            </Routes>
+        </>
+    );
 }

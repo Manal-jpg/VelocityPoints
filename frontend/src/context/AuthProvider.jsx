@@ -58,5 +58,6 @@ export function AuthProvider({ children }) {
 
   const value = { user, loading, error, login, logout, setUser };
 
+  // the value object is passed down to all the children
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
