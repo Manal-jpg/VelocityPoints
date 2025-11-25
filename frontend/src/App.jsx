@@ -8,6 +8,10 @@ import ChangePassword from "./pages/ChangePassword.jsx";
 import ManagerUsers from "./pages/ManagerUsers.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import { useAuth } from "./hooks/useAuth";
+import Events from "./pages/Events.jsx";
+import CreateEvent from "./pages/CreateEvent.jsx";
+
+
 
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
@@ -81,6 +85,29 @@ export default function App() {
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
+
+        <Route
+          path="/events"
+          element={
+            <ProtectedRoute>
+              <Events />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+        
+        <Route
+          path="/manager/events/new"
+          element={
+            <ProtectedRoute>
+            <CreateEvent />
+        </ProtectedRoute>
+  }
+/>
+
+
+
         {/* <Route
           path="/profile"
           element={
@@ -124,6 +151,9 @@ export default function App() {
 
       <Route path="/manager/users" element={<ManagerUsers />} />
       <Route path="/manager/transactions" element={<ManagerTransactions />} /> */}
+
+
+
       </Routes>
     </>
   );
