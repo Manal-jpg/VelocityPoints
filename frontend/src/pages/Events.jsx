@@ -1,31 +1,40 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { EventCard } from "../components/EventCard";
 import { AppLayout } from "../components/layout/Layout";
-import { Link } from "react-router-dom";
+import { api } from "../api/client";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Events() {
   const [events, setEvents] = useState([]);
-  const { token } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { user } = useAuth();
+
+  const isManagerPlus = useMemo(
+    () => (user?.role || "").toLowerCase() === "manager" || (user?.role || "").toLowerCase() === "superuser",
+    [user]
+  );
 
   useEffect(() => {
     async function loadEvents() {
       try {
-        const res = await fetch("http://localhost:3000/events", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        const data = await res.json();
-
-        // backend returns { events: [...] }
-        setEvents(data.events || []);
+        setLoading(true);
+        setError("");
+        const params = isManagerPlus ? {} : { published: true };
+        const { data } = await api.get("/events", { params });
+        // backend returns { count, results }
+        setEvents(data.results || []);
       } catch (err) {
         console.error("Failed to fetch events:", err);
+        setError(err?.response?.data?.error || "Unable to load events.");
+      } finally {
+        setLoading(false);
       }
     }
 
     loadEvents();
-  }, [token]);
+  }, [isManagerPlus]);
 
   return (
     <AppLayout title="Events">
@@ -44,8 +53,11 @@ export default function Events() {
         </div>
 
         {/* EVENTS GRID */}
+        {loading && <p className="text-sm text-slate-600">Loading events...</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.length === 0 ? (
+          {events.length === 0 && !loading && !error ? (
             <p className="text-gray-500">No events yet.</p>
           ) : (
             events.map((event) => {
@@ -58,8 +70,8 @@ export default function Events() {
                     id: event.id,
                     title: event.name,
                     description: event.description,
-                    points: event.points,
-                    rsvps: event.rsvpsCount ?? 0,
+                    points: event.pointsRemain ?? event.pointsAwarded ?? event.points ?? 0,
+                    rsvps: event.numGuests ?? event.rsvpsCount ?? 0,
                     rsvped: false,
                     date: start.toLocaleDateString("en-US", {
                       month: "short",

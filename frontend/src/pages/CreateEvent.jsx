@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "../components/layout/Layout";
-import { useAuth } from "../hooks/useAuth";
+import { api } from "../api/client";
 
 export default function CreateEvent() {
-  const { token } = useAuth();
-
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -25,48 +25,40 @@ export default function CreateEvent() {
   };
 
   const createEvent = async () => {
-    const payload = {
-      name: form.name.trim(),
-      description: form.description.trim(),
-      location: form.location.trim(),
-      startTime: new Date(form.startTime).toISOString(),
-      endTime: new Date(form.endTime).toISOString(),
-      points: Number(form.points),
-      capacity: form.capacity ? Number(form.capacity) : null,
-      published: form.published,
-    };
+    try {
+      const payload = {
+        name: form.name.trim(),
+        description: form.description.trim(),
+        location: form.location.trim(),
+        startTime: form.startTime
+          ? new Date(form.startTime).toISOString()
+          : null,
+        endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
+        points: Number(form.points),
+        capacity: form.capacity ? Number(form.capacity) : null,
+        published: form.published,
+      };
 
-    console.log("SENDING PAYLOAD:", payload);
-
-    const res = await fetch("http://localhost:3000/events", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    console.log("BACKEND RESPONSE STATUS:", res.status);
-
-    const data = await res.json();
-    console.log("BACKEND RESPONSE BODY:", data);
-
-    if (res.ok) {
+      const { status, data } = await api.post("/events", payload);
+      console.log("BACKEND RESPONSE STATUS:", status, data);
       alert("Event created!");
-    } else {
-      alert("Error: " + data.error);
+      navigate("/events");
+    } catch (err) {
+      console.error(err);
+      const message =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Error creating event.";
+      alert("Error: " + message);
     }
   };
 
   return (
     <AppLayout title="Create Event">
       <div className="p-8 max-w-3xl mx-auto">
-
         <h2 className="text-2xl font-semibold mb-6">Create Event</h2>
 
         <div className="space-y-5">
-
           {/* Event Name */}
           <div>
             <label className="block font-medium mb-1">Event Name</label>
@@ -137,7 +129,9 @@ export default function CreateEvent() {
             </div>
 
             <div>
-              <label className="block font-medium mb-1">Capacity (optional)</label>
+              <label className="block font-medium mb-1">
+                Capacity (optional)
+              </label>
               <input
                 name="capacity"
                 type="number"
@@ -150,11 +144,7 @@ export default function CreateEvent() {
 
           {/* Published toggle */}
           <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="published"
-              onChange={handleChange}
-            />
+            <input type="checkbox" name="published" onChange={handleChange} />
             <span className="font-medium">Publish Immediately</span>
           </label>
 
@@ -165,7 +155,6 @@ export default function CreateEvent() {
           >
             Create Event
           </button>
-
         </div>
       </div>
     </AppLayout>
