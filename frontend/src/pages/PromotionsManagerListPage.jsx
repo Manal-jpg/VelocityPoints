@@ -1,257 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import { listPromotions, deletePromotion } from "../api/promotions";
-// import { useNavigate } from "react-router-dom";
-
-// export default function PromotionsManagerListPage() {
-//   const [promos, setPromos] = useState([]);
-//   const [count, setCount] = useState(0);
-//   const [page, setPage] = useState(1);
-//   const limit = 10;
-
-//   const [nameFilter, setNameFilter] = useState("");
-//   const [typeFilter, setTypeFilter] = useState("all");
-//   const [publishedFilter, setPublishedFilter] = useState("all"); // all | true | false
-//   const [statusFilter, setStatusFilter] = useState("all"); // all | upcoming | active | ended
-
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState("");
-//   const [deleteError, setDeleteError] = useState("");
-//   const [deletingId, setDeletingId] = useState(null);
-
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     let ignore = false;
-
-//     async function load() {
-//       setLoading(true);
-//       setError("");
-//       try {
-//         let started;
-//         let ended;
-
-//         // map statusFilter to backend's started/ended
-//         if (statusFilter === "upcoming") {
-//           started = false;
-//         } else if (statusFilter === "active") {
-//           started = true; // don't send ended, backend handles
-//         } else if (statusFilter === "ended") {
-//           ended = true;
-//         }
-
-//         const data = await listPromotions({
-//           page,
-//           limit,
-//           name: nameFilter || undefined,
-//           type: typeFilter === "all" ? undefined : typeFilter,
-//           published:
-//             publishedFilter === "all"
-//               ? "all"
-//               : publishedFilter === "true",
-//           started,
-//           ended,
-//         });
-
-//         if (!ignore) {
-//           setPromos(data.results || []);
-//           setCount(data.count || 0);
-//         }
-//       } catch (err) {
-//         if (!ignore) setError(err.message || "Failed to load promotions.");
-//       } finally {
-//         if (!ignore) setLoading(false);
-//       }
-//     }
-
-//     load();
-//     return () => {
-//       ignore = true;
-//     };
-//   }, [page, nameFilter, typeFilter, publishedFilter, statusFilter]);
-
-//   const totalPages = Math.max(1, Math.ceil(count / limit));
-
-//   async function handleDelete(id) {
-//     if (!window.confirm("Delete this promotion? This cannot be undone.")) {
-//       return;
-//     }
-//     setDeleteError("");
-//     setDeletingId(id);
-//     try {
-//       await deletePromotion(id);
-
-//       const data = await listPromotions({
-//         page,
-//         limit,
-//         name: nameFilter || undefined,
-//       });
-//       setPromos(data.results || []);
-//       setCount(data.count || 0);
-//     } catch (err) {
-//       setDeleteError(err.message || "Failed to delete promotion.");
-//     } finally {
-//       setDeletingId(null);
-//     }
-//   }
-
-//   return (
-//     <div className="p-4 space-y-4">
-//       <div className="flex flex-wrap items-center justify-between gap-2">
-//         <h1 className="text-xl font-semibold">Manage Promotions</h1>
-//         <button
-//           className="px-3 py-1.5 rounded bg-blue-600 text-white text-sm"
-//           onClick={() => navigate("/manager/promotions/create")}
-//         >
-//           + New Promotion
-//         </button>
-//       </div>
-
-//       <div className="border rounded-md p-3 bg-gray-50 space-y-2 text-sm">
-//         <div className="flex flex-wrap gap-2">
-//           <input
-//             className="border rounded px-2 py-1 text-sm"
-//             placeholder="Search by name..."
-//             value={nameFilter}
-//             onChange={(e) => {
-//               setPage(1);
-//               setNameFilter(e.target.value);
-//             }}
-//           />
-
-//           <select
-//             className="border rounded px-2 py-1 text-sm"
-//             value={typeFilter}
-//             onChange={(e) => {
-//               setPage(1);
-//               setTypeFilter(e.target.value);
-//             }}
-//           >
-//             <option value="all">All types</option>
-//             <option value="automatic">Automatic</option>
-//             <option value="one-time">onetime</option>
-//           </select>
-
-//           <select
-//             className="border rounded px-2 py-1 text-sm"
-//             value={publishedFilter}
-//             onChange={(e) => {
-//               setPage(1);
-//               setPublishedFilter(e.target.value);
-//             }}
-//           >
-//             <option value="all">All (published & draft)</option>
-//             <option value="true">Published only</option>
-//             <option value="false">Draft/unpublished</option>
-//           </select>
-
-//           <select
-//             className="border rounded px-2 py-1 text-sm"
-//             value={statusFilter}
-//             onChange={(e) => {
-//               setPage(1);
-//               setStatusFilter(e.target.value);
-//             }}
-//           >
-//             <option value="all">All status</option>
-//             <option value="upcoming">Upcoming</option>
-//             <option value="active">Active (started)</option>
-//             <option value="ended">Ended</option>
-//           </select>
-//         </div>
-//       </div>
-
-//       {loading && <p>Loading promotions...</p>}
-//       {error && <p className="text-sm text-red-600">{error}</p>}
-//       {deleteError && <p className="text-sm text-red-600">{deleteError}</p>}
-
-//       {!loading && !error && promos.length === 0 && (
-//         <p className="text-sm text-gray-600">No promotions found.</p>
-//       )}
-
-//       {!loading && promos.length > 0 && (
-//         <div className="overflow-x-auto">
-//           <table className="min-w-full text-sm border">
-//             <thead className="bg-gray-100">
-//               <tr>
-//                 <th className="border px-2 py-1 text-left">Name</th>
-//                 <th className="border px-2 py-1">Type</th>
-//                 <th className="border px-2 py-1">Start</th>
-//                 <th className="border px-2 py-1">End</th>
-//                 <th className="border px-2 py-1">Min Spending</th>
-//                 <th className="border px-2 py-1">Rate</th>
-//                 <th className="border px-2 py-1">Points</th>
-//                 <th className="border px-2 py-1">Actions</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {promos.map((p) => (
-//                 <tr key={p.id} className="border-t">
-//                   <td className="border px-2 py-1">{p.name}</td>
-//                   <td className="border px-2 py-1 text-center">{p.type}</td>
-//                   <td className="border px-2 py-1 text-xs">
-//                     {new Date(p.startTime).toLocaleString()}
-//                   </td>
-//                   <td className="border px-2 py-1 text-xs">
-//                     {new Date(p.endTime).toLocaleString()}
-//                   </td>
-//                   <td className="border px-2 py-1 text-center">
-//                     {p.minSpending ?? "-"}
-//                   </td>
-//                   <td className="border px-2 py-1 text-center">
-//                     {p.rate ?? "-"}
-//                   </td>
-//                   <td className="border px-2 py-1 text-center">
-//                     {p.points ?? "-"}
-//                   </td>
-//                   <td className="border px-2 py-1 text-center space-x-2">
-//                     <button
-//                       className="text-blue-600 hover:underline"
-//                       onClick={() =>
-//                         navigate(`/manager/promotions/${p.id}`)
-//                       }
-//                     >
-//                       Edit
-//                     </button>
-//                     <button
-//                       className="text-red-600 hover:underline disabled:opacity-50"
-//                       disabled={deletingId === p.id}
-//                       onClick={() => handleDelete(p.id)}
-//                     >
-//                       {deletingId === p.id ? "Deleting..." : "Delete"}
-//                     </button>
-//                   </td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </div>
-//       )}
-
-//       {totalPages > 1 && (
-//         <div className="flex items-center gap-2 mt-4 text-sm">
-//           <button
-//             className="border rounded px-2 py-1 disabled:opacity-50"
-//             disabled={page <= 1}
-//             onClick={() => setPage((p) => p - 1)}
-//           >
-//             Prev
-//           </button>
-//           <span>
-//             Page {page} of {totalPages}
-//           </span>
-//           <button
-//             className="border rounded px-2 py-1 disabled:opacity-50"
-//             disabled={page >= totalPages}
-//             onClick={() => setPage((p) => p + 1)}
-//           >
-//             Next
-//           </button>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { listPromotions, deletePromotion } from "../api/promotions";
@@ -264,8 +10,12 @@ export default function PromotionsManagerListPage() {
   const limit = 10;
 
   const [nameFilter, setNameFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all"); // automatic | onetime | all
-  const [statusFilter, setStatusFilter] = useState("all"); // all | upcoming | active | ended
+  const [typeFilter, setTypeFilter] = useState("all");     // automatic | onetime | all
+  const [statusFilter, setStatusFilter] = useState("all");  // all | upcoming | active | ended
+
+  // Sorting state
+  const [sortBy, setSortBy] = useState("startTime");        // startTime | endTime | name | type
+  const [sortDir, setSortDir] = useState("desc");           // asc | desc
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -289,9 +39,9 @@ export default function PromotionsManagerListPage() {
         if (statusFilter === "upcoming") {
           started = false; // startTime > now
         } else if (statusFilter === "active") {
-          started = true; // startTime <= now AND endTime > now
+          started = true;  // startTime <= now AND endTime > now
         } else if (statusFilter === "ended") {
-          ended = true; // endTime <= now
+          ended = true;    // endTime <= now
         }
 
         const data = await listPromotions({
@@ -301,6 +51,8 @@ export default function PromotionsManagerListPage() {
           type: typeFilter === "all" ? undefined : typeFilter,
           started,
           ended,
+          sortBy,
+          sortDir,
         });
 
         if (!ignore) {
@@ -318,7 +70,7 @@ export default function PromotionsManagerListPage() {
     return () => {
       ignore = true;
     };
-  }, [page, nameFilter, typeFilter, statusFilter]);
+  }, [page, nameFilter, typeFilter, statusFilter, sortBy, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(count / limit));
 
@@ -358,13 +110,24 @@ export default function PromotionsManagerListPage() {
     try {
       await deletePromotion(id);
 
+      // reload with same filters + sort
+      let started;
+      let ended;
+      if (statusFilter === "upcoming") started = false;
+      else if (statusFilter === "active") started = true;
+      else if (statusFilter === "ended") ended = true;
+
       const data = await listPromotions({
         page,
         limit,
         name: nameFilter || undefined,
         type: typeFilter === "all" ? undefined : typeFilter,
-        // keep same status filter mapping after delete
+        started,
+        ended,
+        sortBy,
+        sortDir,
       });
+
       setPromos(data.results || []);
       setCount(data.count || 0);
     } catch (err) {
@@ -389,6 +152,7 @@ export default function PromotionsManagerListPage() {
 
         <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
           <div className="flex flex-wrap gap-3 text-sm">
+            {/* Name filter */}
             <input
               className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white shadow-sm"
               placeholder="Search by name..."
@@ -399,6 +163,7 @@ export default function PromotionsManagerListPage() {
               }}
             />
 
+            {/* Type filter */}
             <select
               className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white shadow-sm"
               value={typeFilter}
@@ -409,9 +174,10 @@ export default function PromotionsManagerListPage() {
             >
               <option value="all">All types</option>
               <option value="automatic">Automatic</option>
-              <option value="onetime">One-time</option>
+              <option value="one-time">One-time</option>
             </select>
 
+            {/* Status filter */}
             <select
               className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white shadow-sm"
               value={statusFilter}
@@ -424,6 +190,34 @@ export default function PromotionsManagerListPage() {
               <option value="upcoming">Upcoming</option>
               <option value="active">Active</option>
               <option value="ended">Ended</option>
+            </select>
+
+            {/* Sort by */}
+            <select
+              className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white shadow-sm"
+              value={sortBy}
+              onChange={(e) => {
+                setPage(1);
+                setSortBy(e.target.value);
+              }}
+            >
+              <option value="startTime">Sort by Start Date</option>
+              <option value="endTime">Sort by End Date</option>
+              <option value="name">Sort by Name</option>
+              <option value="type">Sort by Type</option>
+            </select>
+
+            {/* Sort direction */}
+            <select
+              className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white shadow-sm"
+              value={sortDir}
+              onChange={(e) => {
+                setPage(1);
+                setSortDir(e.target.value);
+              }}
+            >
+              <option value="asc">Ascending ↑</option>
+              <option value="desc">Descending ↓</option>
             </select>
           </div>
         </div>
@@ -454,13 +248,19 @@ export default function PromotionsManagerListPage() {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="space-y-1">
-                      <p className="text-xs uppercase tracking-wide text-slate-500">Promotion</p>
-                      <h3 className="text-lg font-semibold text-slate-900">{p.name}</h3>
+                      <p className="text-xs uppercase tracking-wide text-slate-500">
+                        Promotion
+                      </p>
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        {p.name}
+                      </h3>
                       <div className="flex items-center gap-2 text-xs">
                         <span className="inline-flex items-center px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
                           {p.type === "automatic" ? "Automatic" : "One-time"}
                         </span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full ${statusClasses}`}>
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full ${statusClasses}`}
+                        >
                           {status.text}
                         </span>
                       </div>
@@ -468,11 +268,15 @@ export default function PromotionsManagerListPage() {
                     <div className="flex flex-col items-end gap-2 text-sm text-slate-600">
                       <div className="text-right">
                         <p className="text-xs text-slate-500">Starts</p>
-                        <p className="font-medium text-slate-800">{formatDate(p.startTime)}</p>
+                        <p className="font-medium text-slate-800">
+                          {formatDate(p.startTime)}
+                        </p>
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-slate-500">Ends</p>
-                        <p className="font-medium text-slate-800">{formatDate(p.endTime)}</p>
+                        <p className="font-medium text-slate-800">
+                          {formatDate(p.endTime)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -486,11 +290,15 @@ export default function PromotionsManagerListPage() {
                     </div>
                     <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
                       <p className="text-xs text-slate-500">Rate</p>
-                      <p className="font-semibold text-slate-900">{p.rate ?? "—"}</p>
+                      <p className="font-semibold text-slate-900">
+                        {p.rate ?? "—"}
+                      </p>
                     </div>
                     <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
                       <p className="text-xs text-slate-500">Points</p>
-                      <p className="font-semibold text-slate-900">{p.points ?? "—"}</p>
+                      <p className="font-semibold text-slate-900">
+                        {p.points ?? "—"}
+                      </p>
                     </div>
                   </div>
 
