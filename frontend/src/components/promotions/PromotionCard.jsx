@@ -17,9 +17,8 @@ export default function PromotionCard({ promo, onClick }) {
 
   return (
     <article
-      className="border rounded-lg p-4 shadow-sm hover:shadow-md transition cursor-pointer bg-white"
+      className="border rounded-lg p-4 shadow-sm bg-white hover:shadow-md transition cursor-pointer"
       onClick={onClick}
-      aria-label={`Promotion ${name}`}
     >
       <header className="mb-2">
         <h3 className="font-semibold text-lg">{name}</h3>

@@ -87,7 +87,8 @@ export default function PromotionsUserPage() {
             <PromotionCard
               key={promo.id}
               promo={promo}
-              onClick={() => navigate(`/promotions/${promo.id}`)}
+              onClick={() => navigate(`/promotions/${promo.id}/view`)}
+
             />
           ))}
         </div>
