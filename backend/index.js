@@ -3331,23 +3331,11 @@ app.get(
         baseWhere.endTime = { gt: now };
       }
 
-      // SORTING LOGIC    
-      let sortBy = req.query.sortBy || "startTime"; // name | type | startTime | endTime
-      let sortDir = req.query.sortDir === "desc" ? "desc" : "asc"; // asc | desc
-
-      const validSortFields = ["name", "type", "startTime", "endTime"];
-      if (!validSortFields.includes(sortBy)) {
-        sortBy = "startTime";
-      }
-
-      const orderBy = {};
-      orderBy[sortBy] = sortDir;
-
       const [count, results] = await Promise.all([
         prisma.promotion.count({ where: baseWhere }),
         prisma.promotion.findMany({
           where: baseWhere,
-          orderBy,                      // use dynamic sort
+          orderBy: { startTime: "desc" },
           skip: (p - 1) * l,
           take: l,
           select: {
@@ -3361,7 +3349,7 @@ app.get(
             points: true,
           },
         }),
-      ]); 
+      ]);
 
       return res.status(200).json({
         count,

@@ -51,13 +51,30 @@ export default function PromotionsManagerListPage() {
           type: typeFilter === "all" ? undefined : typeFilter,
           started,
           ended,
-          sortBy,
-          sortDir,
         });
 
         if (!ignore) {
-          setPromos(data.results || []);
-          setCount(data.count || 0);
+          const results = Array.isArray(data.results) ? data.results : [];
+          const sorted = [...results].sort((a, b) => {
+            const dir = sortDir === "asc" ? 1 : -1;
+            const timeDiff = (key) =>
+              (new Date(a[key] || 0).getTime() || 0) -
+              (new Date(b[key] || 0).getTime() || 0);
+            switch (sortBy) {
+              case "name":
+                return dir * (a.name || "").localeCompare(b.name || "");
+              case "type":
+                return dir * (a.type || "").localeCompare(b.type || "");
+              case "endTime":
+                return dir * timeDiff("endTime");
+              case "startTime":
+              default:
+                return dir * timeDiff("startTime");
+            }
+          });
+
+          setPromos(sorted);
+          setCount(data.count || results.length || 0);
         }
       } catch (err) {
         if (!ignore) setError(err.message || "Failed to load promotions.");
@@ -124,12 +141,29 @@ export default function PromotionsManagerListPage() {
         type: typeFilter === "all" ? undefined : typeFilter,
         started,
         ended,
-        sortBy,
-        sortDir,
       });
 
-      setPromos(data.results || []);
-      setCount(data.count || 0);
+      const results = Array.isArray(data.results) ? data.results : [];
+      const sorted = [...results].sort((a, b) => {
+        const dir = sortDir === "asc" ? 1 : -1;
+        const timeDiff = (key) =>
+          (new Date(a[key] || 0).getTime() || 0) -
+          (new Date(b[key] || 0).getTime() || 0);
+        switch (sortBy) {
+          case "name":
+            return dir * (a.name || "").localeCompare(b.name || "");
+          case "type":
+            return dir * (a.type || "").localeCompare(b.type || "");
+          case "endTime":
+            return dir * timeDiff("endTime");
+          case "startTime":
+          default:
+            return dir * timeDiff("startTime");
+        }
+      });
+
+      setPromos(sorted);
+      setCount(data.count || results.length || 0);
     } catch (err) {
       setDeleteError(err.message || "Failed to delete promotion.");
     } finally {
