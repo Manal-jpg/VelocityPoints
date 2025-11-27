@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { api } from "../api/client";
 import { AppLayout } from "../components/layout/Layout";
+import { api } from "../api/client";
 
 export default function EditEvent() {
   const { id } = useParams();
@@ -13,16 +13,15 @@ export default function EditEvent() {
     location: "",
     startTime: "",
     endTime: "",
-    points: "",
     capacity: "",
+    points: "",
     published: false,
   });
 
   const [loading, setLoading] = useState(true);
 
-  // Load existing event
   useEffect(() => {
-    const load = async () => {
+    async function loadEvent() {
       try {
         const { data } = await api.get(`/events/${id}`);
 
@@ -30,10 +29,10 @@ export default function EditEvent() {
           name: data.name,
           description: data.description,
           location: data.location,
-          startTime: data.startTime ? data.startTime.slice(0, 16) : "",
-          endTime: data.endTime ? data.endTime.slice(0, 16) : "",
-          points: data.pointsRemain ?? data.pointsAwarded ?? 0,
+          startTime: data.startTime.slice(0, 16),
+          endTime: data.endTime.slice(0, 16),
           capacity: data.capacity ?? "",
+          points: data.pointsRemain ?? data.pointsAwarded ?? 0,
           published: data.published,
         });
       } catch (err) {
@@ -42,27 +41,25 @@ export default function EditEvent() {
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    load();
+    loadEvent();
   }, [id]);
 
-  // Update event
   const updateEvent = async () => {
     try {
       const payload = {
         name: form.name.trim(),
         description: form.description.trim(),
         location: form.location.trim(),
-        startTime: form.startTime ? new Date(form.startTime).toISOString() : null,
-        endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
-        points: Number(form.points),
+        startTime: new Date(form.startTime).toISOString(),
+        endTime: new Date(form.endTime).toISOString(),
         capacity: form.capacity ? Number(form.capacity) : null,
+        points: Number(form.points),
         published: form.published,
       };
 
-      const { status, data } = await api.patch(`/events/${id}`, payload);
-      console.log("UPDATED EVENT:", status, data);
+      const { status } = await api.patch(`/events/${id}`, payload);
 
       alert("Event updated!");
       navigate(`/manager/events/${id}`);
@@ -82,9 +79,8 @@ export default function EditEvent() {
 
   return (
     <AppLayout title="Edit Event">
-      <div className="max-w-xl mx-auto p-8 bg-white rounded-xl shadow-md mt-10">
-
-        <h2 className="text-2xl font-bold mb-6 text-center">Edit Event</h2>
+      <div className="max-w-xl mx-auto p-8 mt-12 bg-white rounded-xl shadow-lg">
+        <h1 className="text-2xl font-bold mb-6 text-center">Edit Event</h1>
 
         <div className="space-y-4">
           <input
@@ -108,7 +104,6 @@ export default function EditEvent() {
             onChange={(e) => setForm({ ...form, location: e.target.value })}
           />
 
-          <label className="block text-sm font-semibold">Start Time</label>
           <input
             type="datetime-local"
             className="input"
@@ -116,7 +111,6 @@ export default function EditEvent() {
             onChange={(e) => setForm({ ...form, startTime: e.target.value })}
           />
 
-          <label className="block text-sm font-semibold">End Time</label>
           <input
             type="datetime-local"
             className="input"
@@ -125,28 +119,30 @@ export default function EditEvent() {
           />
 
           <input
-            type="number"
             className="input"
+            type="number"
             placeholder="Points"
             value={form.points}
             onChange={(e) => setForm({ ...form, points: e.target.value })}
           />
 
           <input
-            type="number"
             className="input"
+            type="number"
             placeholder="Capacity (optional)"
             value={form.capacity}
             onChange={(e) => setForm({ ...form, capacity: e.target.value })}
           />
 
-          <label className="flex items-center gap-2 mt-2">
+          <label className="flex gap-2 items-center">
             <input
               type="checkbox"
               checked={form.published}
-              onChange={(e) => setForm({ ...form, published: e.target.checked })}
+              onChange={(e) =>
+                setForm({ ...form, published: e.target.checked })
+              }
             />
-            Publish event
+            Publish Event
           </label>
 
           <button
