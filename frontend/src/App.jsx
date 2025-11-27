@@ -10,6 +10,8 @@ import ResetPassword from "./pages/ResetPassword.jsx";
 import { useAuth } from "./hooks/useAuth";
 import Events from "./pages/Events.jsx";
 import CreateEvent from "./pages/CreateEvent.jsx";
+import EventDetails from "./pages/EventDetails.jsx"; 
+import EditEvent from "./pages/EditEvent.jsx";
 
 
 
@@ -84,7 +86,37 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/manager/events/:id/edit"
+          element={
+            <ProtectedRoute>
+              <EditEvent />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="*" element={<Navigate to="/" replace />} />
+
+        {/* <Route
+          path="/events"
+          element={
+            <ProtectedRoute>
+              <Events />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+
+        <Route
+          path="/manager/events/new"
+          element={
+            <ProtectedRoute>
+            <CreateEvent />
+        </ProtectedRoute>
+          }
+        /> */}
 
         <Route
           path="/events"
@@ -95,16 +127,26 @@ export default function App() {
           }
         />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-        
+
         <Route
           path="/manager/events/new"
           element={
             <ProtectedRoute>
-            <CreateEvent />
-        </ProtectedRoute>
-  }
-/>
+              <CreateEvent />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/manager/events/:id"
+          element={
+            <ProtectedRoute>
+              <EventDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<Navigate to="/" replace />} />
 
 
 
