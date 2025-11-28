@@ -7,7 +7,7 @@ import AccountInfo from "./pages/AccountInfo.jsx";
 import ChangePassword from "./pages/ChangePassword.jsx";
 import ManagerUsers from "./pages/ManagerUsers.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
-import Transactions from "./pages/transactions.jsx";
+import Transactions from "./pages/Transactions.jsx";
 import {useAuth} from "./hooks/useAuth";
 
 function PublicRoute({children}) {
