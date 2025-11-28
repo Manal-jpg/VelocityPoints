@@ -3271,6 +3271,46 @@ app.get(
       }
     }
 
+    // if (isManagerPlus) {
+    //   const now = new Date();
+
+    //   if (req.query.published !== undefined) {
+    //     const pb = parseBool(req.query.published);
+    //     if (pb === undefined) {
+    //       return res.status(400).json({ message: "Bad Request" });
+    //     }
+    //     baseWhere.published = pb;
+    //   }
+
+    //   if (started === true) {
+    //     baseWhere.startTime = { lt: now };
+    //   } else if (started === false) {
+    //     baseWhere.startTime = { gte: now };
+    //   } else if (ended === true) {
+    //     baseWhere.endTime = { lte: now };
+    //   } else if (ended === false) {
+    //     baseWhere.endTime = { gt: now };
+    //   }
+
+    //   const [count, results] = await Promise.all([
+    //     prisma.promotion.count({ where: baseWhere }),
+    //     prisma.promotion.findMany({
+    //       where: baseWhere,
+    //       orderBy: { startTime: "desc" },
+    //       skip: (p - 1) * l,
+    //       take: l,
+    //       select: {
+    //         id: true,
+    //         name: true,
+    //         type: true,
+    //         startTime: true,
+    //         endTime: true,
+    //         minSpending: true,
+    //         rate: true,
+    //         points: true,
+    //       },
+    //     }),
+    //   ]);
     if (isManagerPlus) {
       const now = new Date();
 
