@@ -8,6 +8,8 @@ import ChangePassword from "./pages/ChangePassword.jsx";
 import ManagerUsers from "./pages/ManagerUsers.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import { useAuth } from "./hooks/useAuth";
+
+//Events
 import Events from "./pages/Events.jsx";
 import CreateEvent from "./pages/CreateEvent.jsx";
 import EventDetails from "./pages/EventDetails.jsx"; 
@@ -98,26 +100,6 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
 
-        {/* <Route
-          path="/events"
-          element={
-            <ProtectedRoute>
-              <Events />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route path="*" element={<Navigate to="/" replace />} />
-
-        <Route
-          path="/manager/events/new"
-          element={
-            <ProtectedRoute>
-            <CreateEvent />
-        </ProtectedRoute>
-          }
-        /> */}
-
         <Route
           path="/events"
           element={
@@ -126,7 +108,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
 
         <Route
           path="/manager/events/new"
@@ -147,54 +128,6 @@ export default function App() {
         />
 
         <Route path="*" element={<Navigate to="/" replace />} />
-
-
-
-        {/* <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-      <Route
-        path="/transactions"
-        element={
-          <ProtectedRoute>
-            <Transactions />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/cashier"
-        element={
-          <ProtectedRoute>
-            <Cashier />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/events"
-        element={
-          <ProtectedRoute>
-            <Events />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/promotions"
-        element={
-          <ProtectedRoute>
-            <Promotions />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route path="/manager/users" element={<ManagerUsers />} />
-      <Route path="/manager/transactions" element={<ManagerTransactions />} /> */}
-
-
 
       </Routes>
     </>
