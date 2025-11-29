@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { EventCard } from "../components/EventCard";
 import { AppLayout } from "../components/layout/Layout";
 import { api } from "../api/client";
@@ -12,72 +12,74 @@ export default function Events() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // FILTERS
+  // Filters
   const [nameFilter, setNameFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
-  const [timeFilter, setTimeFilter] = useState("all"); // all | upcoming | past
-  const [publishedFilter, setPublishedFilter] = useState("all"); // manager+
+  const [timeFilter, setTimeFilter] = useState("all");
+  const [publishedFilter, setPublishedFilter] = useState("all");
 
-  // PAGINATION
+  // Pagination
   const [page, setPage] = useState(1);
-  const limit = 6; // number of events per page
+  const limit = 6;
 
+  const location = useLocation();
   const { user } = useAuth();
+
   const isManagerPlus = useMemo(
-    () =>
-      ["manager", "superuser"].includes(user?.role?.toLowerCase()),
+    () => ["manager", "superuser"].includes(user?.role?.toLowerCase()),
     [user]
   );
 
-  // Load events
-  useEffect(() => {
-    async function loadEvents() {
-      try {
-        setLoading(true);
-        setError("");
+  async function loadEvents() {
+    try {
+      setLoading(true);
+      setError("");
 
-        const params = {
-          page,
-          limit,
-        };
+      const params = { page, limit };
 
-        // Apply Filters
-        if (nameFilter.trim()) params.name = nameFilter.trim();
-        if (locationFilter.trim()) params.location = locationFilter.trim();
+      // Filters
+      if (nameFilter.trim()) params.name = nameFilter.trim();
+      if (locationFilter.trim()) params.location = locationFilter.trim();
 
-        if (timeFilter === "upcoming") params.started = false;
-        if (timeFilter === "past") params.ended = true;
+      if (timeFilter === "upcoming") params.started = false;
+      if (timeFilter === "past") params.ended = true;
 
-        if (isManagerPlus && publishedFilter !== "all") {
-          params.published = publishedFilter === "published";
-        }
-
-        const { data } = await api.get("/events", { params });
-
-        setEvents(data.results || []);
-        setCount(data.count || 0);
-
-      } catch (err) {
-        console.error("Failed to fetch events:", err);
-        setError(
-          err?.response?.data?.error ||
-            err?.response?.data?.message ||
-            "Unable to load events."
-        );
-      } finally {
-        setLoading(false);
+      if (isManagerPlus && publishedFilter !== "all") {
+        params.published = publishedFilter === "published";
       }
-    }
 
+      const { data } = await api.get("/events", { params });
+
+      setEvents(data.results || []);
+      setCount(data.count || 0);
+    } catch (err) {
+      console.error("Failed to fetch events:", err);
+      setError(
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Unable to load events."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Reload when filters/pagination change
+  useEffect(() => {
     loadEvents();
   }, [page, nameFilter, locationFilter, timeFilter, publishedFilter, isManagerPlus]);
+
+  // Reload when navigating back
+  useEffect(() => {
+    loadEvents();
+  }, [location.pathname]);
 
   const totalPages = Math.ceil(count / limit);
 
   return (
     <AppLayout title="Events">
       <div className="p-6">
-
+        
         {/* HEADER */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Events</h2>
@@ -92,8 +94,6 @@ export default function Events() {
 
         {/* FILTERS */}
         <div className="bg-white p-4 rounded-lg shadow-md mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-
-          {/* Name Search */}
           <input
             className="input border p-2 rounded"
             placeholder="Search by name..."
@@ -104,7 +104,6 @@ export default function Events() {
             }}
           />
 
-          {/* Location Filter */}
           <input
             className="input border p-2 rounded"
             placeholder="Filter by location..."
@@ -115,7 +114,6 @@ export default function Events() {
             }}
           />
 
-          {/* Time Filter */}
           <select
             className="border p-2 rounded"
             value={timeFilter}
@@ -129,7 +127,6 @@ export default function Events() {
             <option value="past">Past</option>
           </select>
 
-          {/* Published Filter (only manager+) */}
           {isManagerPlus ? (
             <select
               className="border p-2 rounded"
@@ -166,8 +163,12 @@ export default function Events() {
                     id: event.id,
                     title: event.name,
                     description: event.description,
-                    points: event.pointsRemain ?? event.pointsAwarded ?? event.points ?? 0,
-                    rsvps: event.numGuests ?? event.rsvpsCount ?? 0,
+                    points:
+                      event.pointsRemain ??
+                      event.pointsAwarded ??
+                      event.points ??
+                      0,
+                    rsvps: event._count?.guests ?? 0,   // ⭐ FIXED HERE
                     rsvped: false,
                     date: start.toLocaleDateString("en-US", {
                       month: "short",
@@ -186,7 +187,6 @@ export default function Events() {
 
         {/* PAGINATION */}
         <div className="flex justify-center items-center mt-8 gap-4">
-
           <button
             disabled={page <= 1}
             onClick={() => setPage(page - 1)}
@@ -199,7 +199,9 @@ export default function Events() {
             Prev
           </button>
 
-          <span className="text-gray-700">Page {page} of {totalPages || 1}</span>
+          <span className="text-gray-700">
+            Page {page} of {totalPages || 1}
+          </span>
 
           <button
             disabled={page >= totalPages}
@@ -212,7 +214,6 @@ export default function Events() {
           >
             Next
           </button>
-
         </div>
       </div>
     </AppLayout>

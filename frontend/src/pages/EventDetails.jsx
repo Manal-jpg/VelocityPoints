@@ -12,25 +12,36 @@ export default function EventDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Load event + detect if user RSVP'd
+  const [addUtorid, setAddUtorid] = useState("");
+  const [adding, setAdding] = useState(false);
+
+  // -------------------------------
+  // LOAD EVENT WITH RSVP CHECK
+  // -------------------------------
   const loadEvent = async () => {
     try {
-      const { status, data } = await api.get(`/events/${id}`);
-      console.log("BACKEND RESPONSE STATUS:", status, data);
+      const { data } = await api.get(`/events/${id}`);
 
-      const currentUserId = user?.id;
+      let isRSVPed = false;
 
-      // backend returns guests: [{ id, utorid, name, rsvped }]
-      const isRSVPed = data?.guests?.some((g) => g.id === currentUserId) || false;
+      try {
+        await api.post(`/events/${id}/guests/me`);
+        await api.delete(`/events/${id}/guests/me`);
+        isRSVPed = false;
+      } catch (err) {
+        isRSVPed = true;
+      }
 
-      setEvent({ ...data, rsvped: isRSVPed });
+      setEvent({
+        ...data,
+        rsvped: isRSVPed,
+        numGuests: data.numGuests ?? data.guests?.length ?? 0,
+        guests: data.guests || [],
+        points: data.pointsRemain ?? data.pointsAwarded ?? data.pointsTotal ?? 0,
+      });
     } catch (err) {
-      console.error(err);
-      const message =
-        err?.response?.data?.error ||
-        err?.response?.data?.message ||
-        "Error loading event.";
-      setError(message);
+      console.error("LOAD EVENT ERROR:", err);
+      setError("Error loading event.");
     } finally {
       setLoading(false);
     }
@@ -56,29 +67,34 @@ export default function EventDetails() {
     );
   }
 
-  // --- ROLE CHECKS ---
   const isManagerPlus = ["manager", "superuser"].includes(
     user?.role?.toLowerCase()
   );
+  const isOrganizer = event?.organizers?.some((o) => o.id === user?.id);
 
-  const isOrganizer = event?.organizers?.some(
-    (o) => o.id === user?.id || o.utorid === user?.utorid
-  );
-
-  // --- RSVP HANDLERS ---
+  // -------------------------------
+  // RSVP
+  // -------------------------------
   const handleRSVP = async () => {
     try {
-      const { status } = await api.post(`/events/${id}/guests/me`);
-      console.log("RSVP SUCCESS:", status);
+      await api.post(`/events/${id}/guests/me`);
 
       setEvent((prev) => ({
         ...prev,
         rsvped: true,
-        numGuests: (prev.numGuests || 0) + 1,
+        numGuests: prev.numGuests + 1,
+        guests: [
+          ...(prev.guests || []),
+          {
+            id: user.id,
+            name: user.name,
+            utorid: user.utorid,
+          },
+        ],
       }));
     } catch (err) {
       console.error("RSVP ERROR:", err);
-      alert(err?.response?.data?.error || "Unable to RSVP.");
+      alert("Unable to RSVP.");
     }
   };
 
@@ -89,18 +105,81 @@ export default function EventDetails() {
       setEvent((prev) => ({
         ...prev,
         rsvped: false,
-        numGuests: (prev.numGuests || 0) - 1,
+        numGuests: prev.numGuests - 1,
+        guests: prev.guests.filter((g) => g.id !== user.id),
       }));
     } catch (err) {
       console.error("UN-RSVP ERROR:", err);
-      alert(err?.response?.data?.message || "Unable to cancel RSVP.");
+      alert("Unable to cancel RSVP.");
+    }
+  };
+
+  // -------------------------------
+  // ADD GUEST
+  // -------------------------------
+  const handleAddGuest = async () => {
+    if (!addUtorid.trim()) {
+      alert("Enter a UTORid.");
+      return;
+    }
+
+    try {
+      setAdding(true);
+
+      const res = await api.post(`/events/${id}/guests`, {
+        utorid: addUtorid.trim(),
+      });
+
+      const newGuest = res.data.guestAdded;
+
+      setEvent((prev) => ({
+        ...prev,
+        numGuests: prev.numGuests + 1,
+        guests: [...prev.guests, newGuest],
+      }));
+
+      setAddUtorid("");
+      alert("Guest added!");
+    } catch (err) {
+      console.error("ADD GUEST ERROR:", err);
+      alert("Unable to add guest.");
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  // -------------------------------
+  // REMOVE GUEST
+  // -------------------------------
+  const handleRemoveGuest = async (guestId) => {
+    try {
+      await api.delete(`/events/${id}/guests/${guestId}`);
+
+      setEvent((prev) => ({
+        ...prev,
+        numGuests: prev.numGuests - 1,
+        guests: prev.guests.filter((g) => g.id !== guestId),
+      }));
+    } catch (err) {
+      console.error("REMOVE GUEST ERROR:", err);
+      alert("Unable to remove guest.");
     }
   };
 
   return (
     <AppLayout title="Event Details">
 
-      {/* --- EDIT BUTTON (Managers + Organizers Only) --- */}
+      {/* BACK BUTTON */}
+      <div className="text-center mt-4">
+        <Link
+          to="/events"
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+        >
+          ← Back to Events
+        </Link>
+      </div>
+
+      {/* EDIT BUTTON */}
       {(isManagerPlus || isOrganizer) && (
         <div className="text-center mt-6">
           <Link
@@ -112,7 +191,7 @@ export default function EventDetails() {
         </div>
       )}
 
-      {/* --- RSVP BUTTON (Only Regular users) --- */}
+      {/* RSVP BUTTON */}
       {!isManagerPlus && !isOrganizer && (
         <div className="text-center mt-4">
           {!event.rsvped ? (
@@ -133,7 +212,32 @@ export default function EventDetails() {
         </div>
       )}
 
-      {/* --- EVENT CARD --- */}
+      {/* ADD USER TO EVENT */}
+      {(isManagerPlus || isOrganizer) && (
+        <div className="flex justify-center mt-8 px-4">
+          <div className="w-full max-w-2xl bg-white p-5 rounded-xl shadow">
+            <h3 className="text-lg font-semibold mb-3">Add Guest to Event</h3>
+
+            <input
+              type="text"
+              placeholder="Enter UTORid"
+              value={addUtorid}
+              onChange={(e) => setAddUtorid(e.target.value)}
+              className="border p-2 rounded w-full mb-3"
+            />
+
+            <button
+              onClick={handleAddGuest}
+              disabled={adding}
+              className="bg-[#00a862] text-white px-4 py-2 rounded-lg hover:bg-[#008551] disabled:opacity-50"
+            >
+              {adding ? "Adding..." : "Add Guest"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* DETAILS CARD */}
       <div className="flex justify-center items-start mt-10 px-4">
         <div
           className="w-full max-w-2xl rounded-2xl p-8 shadow-md"
@@ -147,42 +251,58 @@ export default function EventDetails() {
           </h1>
 
           <div className="space-y-4 text-gray-700 text-[15px] leading-relaxed">
-            <p>
-              <strong className="text-gray-900">Description:</strong><br />
-              {event.description}
-            </p>
 
-            <p>
-              <strong className="text-gray-900">Location:</strong><br />
-              {event.location}
-            </p>
+            <p><strong>Description:</strong><br />{event.description}</p>
+            <p><strong>Location:</strong><br />{event.location}</p>
 
-            <p>
-              <strong className="text-gray-900">Start:</strong><br />
-              {new Date(event.startTime).toLocaleString()}
-            </p>
-
-            <p>
-              <strong className="text-gray-900">End:</strong><br />
-              {new Date(event.endTime).toLocaleString()}
-            </p>
+            <p><strong>Start:</strong><br />{new Date(event.startTime).toLocaleString()}</p>
+            <p><strong>End:</strong><br />{new Date(event.endTime).toLocaleString()}</p>
 
             {event.capacity !== null && (
-              <p>
-                <strong className="text-gray-900">Capacity:</strong><br />
-                {event.capacity}
-              </p>
+              <p><strong>Capacity:</strong><br />{event.capacity}</p>
             )}
 
-            {"pointsRemain" in event && (
-              <p>
-                <strong className="text-gray-900">Points:</strong><br />
-                {event.pointsRemain}
-              </p>
-            )}
+            {/* ⭐ ADD POINTS HERE */}
+            <p>
+              <strong>Points:</strong><br />
+              {event.points} pts
+            </p>
+
+            <p><strong>Guests:</strong><br />{event.numGuests}</p>
           </div>
         </div>
       </div>
+
+      {/* GUEST LIST WITH REMOVE BUTTON */}
+      {(isManagerPlus || isOrganizer) && (
+        <div className="w-full max-w-2xl mx-auto mt-8 bg-white p-6 rounded-xl shadow">
+          <h3 className="text-xl font-semibold mb-3">Guests</h3>
+
+          {event.guests.length === 0 ? (
+            <p className="text-gray-600">No guests yet.</p>
+          ) : (
+            <ul className="space-y-2">
+              {event.guests.map((g) => (
+                <li
+                  key={g.id}
+                  className="flex justify-between items-center border-b pb-2"
+                >
+                  <span>{g.name} ({g.utorid})</span>
+
+                  {(isManagerPlus || isOrganizer) && (
+                    <button
+                      onClick={() => handleRemoveGuest(g.id)}
+                      className="text-red-600 hover:text-red-800 text-sm"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </AppLayout>
   );
 }
