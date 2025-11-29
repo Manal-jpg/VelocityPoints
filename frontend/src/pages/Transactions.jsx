@@ -10,6 +10,8 @@ import {CreateTransactionButtons} from "../components/transaction/CreateTransact
 import {TransactionCard} from "../components/transaction/TransactionCard.jsx";
 import {Pagination} from "../components/transaction/Pagination.jsx";
 import {TransactionList} from "../components/transaction/TransactionList.jsx";
+import {TransactionDetails} from "../components/transaction/TransactionDetails.jsx";
+import {CreateTransaction} from "../components/transaction/CreateTransaction.jsx"
 
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
@@ -17,41 +19,38 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:300
 
 export default function Transactions() {
     const {user} = useAuth();
-    const [showCreatePurchase, setshowCreatePurchase] = useState(false)
     const [showCreateAdjustment, setShowCreateAdjustment] = useState(false);
     const [showCreateRedemption, setShowCreateRedemption] = useState(false);
     const [showCreateTransfer, setShowCreateTransfer] = useState(false);
+    const [showCreatePurchase, setShowCreatePurchase] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [transactions, setTransactions] = useState([
-        {
-            id: "TXN-123",
-            title: "Purchase at Campus Store",
-            date: "2025-11-13T14:30:00",
-            amount: 250,
-            type: "purchase",
-            icon: "🛍",
-            utorid: "johndoe1",
-            suspicious: false,
-        },
-        {
-            id: "TXN-124",
-            title: "Redeemed Gift Card",
-            date: "2025-11-12T16:15:00",
-            amount: -500,
-            type: "redemption",
-            icon: "🎁",
-            utorid: "johndoe1",
-            suspicious: false,
-            processed: false, // pending redemption
-        }]);
+            {
+                "id": 2,
+                "type": "redemption",
+                "amount": -500,
+                "redeemed": 500,
+                "utorid": "johndoe1",
+                "processed": false,
+                "processedById": null,
+                "remark": "Gift card",
+                "createdBy": "johndoe1",
+                "createdAt": "2025-11-12T16:15:00Z",
+                "promotionIds": [1,2,3]
+            }
+
+
+    ])
+
+
     const [showFilters, setShowFilters] = useState(false);
     const [activeTypeFilter, setActiveTypeFilter] = useState("");
 
 
     // pagination is not included here
-    const [advancedFilters, setAdvancedFilters] = useState([{
+    const [advancedFilters, setAdvancedFilters] = useState({
         name: "", createdBy: "", suspicious: "", promotionId: "", relatedId: "", amount: 0, operator: "", type: "all"
-    }]);
+    });
 
     const quickFilters = [{value: "all", label: "All Transactions"}, {
         value: "purchase",
@@ -79,7 +78,6 @@ export default function Transactions() {
                 return !(advancedFilters.suspicious !== "" && t.suspicious !== (advancedFilters.suspicious === "true"));
 
 
-
             })
         }
 
@@ -92,14 +90,16 @@ export default function Transactions() {
         <AppLayout title="Transactions">
             <CreateTransactionButtons hasPermissions={hasPermissions} setShowCreateRedemption={setShowCreateRedemption}
                                       setShowCreateAdjustment={setShowCreateAdjustment}
-                                      setShowCreateTransfer={setShowCreateTransfer}
+                                      setShowCreatePurchase={setShowCreatePurchase}
                                       setShowCreateTransfer={setShowCreateTransfer}/>
+
 
             {/*{transaction stats}*/}
             <TransactionStats transactions={transactions}/>
 
             {/* Filter Section #################################################################################*/}
-            <TransactionFilters showFilters={showFilters} activeFilters={activeTypeFilter} setShowFilters={setShowFilters}
+            <TransactionFilters showFilters={showFilters} activeFilters={activeTypeFilter}
+                                setShowFilters={setShowFilters}
                                 setActiveFilter={setActiveTypeFilter} quickFilters={quickFilters}
                                 advancedFilters={advancedFilters} setAdvancedFilters={setAdvancedFilters}
                                 hasPermissions={hasPermissions}
@@ -109,6 +109,39 @@ export default function Transactions() {
 
             />
 
+            {selectedTransaction && (
+                <TransactionDetails transaction={selectedTransaction} onClose={() => setSelectedTransaction(null)}/>
+            )}
+
+            {showCreatePurchase && (
+                <CreateTransaction title={"Create Purchase"}
+                                   onClose={() => setShowCreatePurchase(false)} type={"purchase"}> </CreateTransaction>
+            )
+
+            }
+
+            {showCreateTransfer && (
+                <CreateTransaction title={"Create Transfer"}
+                                   onClose={() => setShowCreateTransfer(false)} type={"transfer"}> </CreateTransaction>
+            )
+
+            }
+
+            {showCreateRedemption && (
+                <CreateTransaction title={"Create Redemption"}
+                                   onClose={() => setShowCreateRedemption(false)} type={"redemption"}> </CreateTransaction>
+            )
+
+            }
+
+            {showCreateAdjustment && (
+                <CreateTransaction title={"Create Adjustment"}
+                                   onClose={() => setShowCreateAdjustment(false)} type={"adjustment"}> </CreateTransaction>
+            )
+
+            }
+
+            {/*{Pagination to be fixed - currently not working}*/}
             <Pagination/>
 
         </AppLayout>);

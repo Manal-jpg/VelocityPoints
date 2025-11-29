@@ -48,12 +48,18 @@ export function TransactionList({filteredTransactions, setSelectedTransaction}) 
 
             <div className={"space-y-3"}>
                 {filteredTransactions.map((t) => (
-                    <TransactionCard key={t.id} id={t.id} icon={t.icon} title={t.title} date={formatDate(t.date)}
-                                     time={formatTime(t.date)} amount={t.amount}
-                                     borderColor={getBorderColor(t.type)} suspicious={t.suspicious}
-                                     processed={t.processed} onClick={() => setSelectedTransaction(t)}
-
-
+                    <TransactionCard
+                        key={t.id}
+                        id={t.id}
+                        title={`${t.type.charAt(0).toUpperCase() + t.type.slice(1)} Transaction`}
+                        date={formatDate(t.createdAt)}
+                        time={formatTime(t.createdAt)}
+                        amount={t.amount}
+                        type={t.type}
+                        borderColor={getBorderColor(t.type)}
+                        suspicious={t.suspicious}
+                        processed={t.processed}
+                        onClick={() => setSelectedTransaction(t)}
                     />
                 ))}
             </div>

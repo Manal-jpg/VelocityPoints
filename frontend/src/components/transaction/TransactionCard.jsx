@@ -1,8 +1,14 @@
 import {ChevronRight, AlertTriangle} from "lucide-react";
+import {
+    ShoppingCart,    // Purchase
+    Gift,            // Redemption
+    ArrowRightLeft,  // Transfer
+    Settings,        // Adjustment
+    Calendar,        // Event
+} from "lucide-react";
 
 export function TransactionCard({
                                     id,
-                                    icon,
                                     title,
                                     date,
                                     time,
@@ -13,8 +19,16 @@ export function TransactionCard({
                                     processed,
                                     onClick
                                 }) {
+    const renderIcon = (type) => {
+        if (type === "purchase") return <ShoppingCart size={16} />;
+        if (type === "transfer") return <ArrowRightLeft size={16} />;
+        if (type === "event") return <Calendar size={16} />;
+        if (type === "redemption") return <Gift size={16} />;
+        if (type === "adjustment") return <Settings size={16} />;
+        return <ShoppingCart size={16} />
+    }
 
-    return (<div on onClick={onClick}
+    return (<div onClick={onClick}
                  className={"bg-white rounded-lg p-6 border-l-4 border border-slate-100 hover:shadow-lg transition-all cursor-pointer"}
                  style={{borderLeftColor: borderColor}}
     >
@@ -25,7 +39,7 @@ export function TransactionCard({
                 className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
                 style={{backgroundColor: `${borderColor}15`}}
             >
-                {icon}
+                {renderIcon(type)}
             </div>
             {/*{content}*/}
             <div className={"flex-1 min-w-0"}>
@@ -60,12 +74,12 @@ export function TransactionCard({
 
             {/* Amount and arrow will go here */}
             <div className="flex items-center gap-2">
-                <span className={`text-xl font-bold ${amount > 0 ? "text-emerald-600" :"text-red-600"}`}>
+                <span className={`text-xl font-bold ${amount > 0 ? "text-emerald-600" : "text-red-600"}`}>
                     {amount > 0 ? "+" : ""}{amount}
                 </span>
 
             </div>
-            <ChevronRight size={20} className="text-slate-400" />
+            <ChevronRight size={20} className="text-slate-400"/>
 
         </div>
 

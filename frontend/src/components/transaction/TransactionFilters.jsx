@@ -6,7 +6,7 @@ export function TransactionFilters({
                                        quickFilters,
                                        advancedFilters,
                                        setAdvancedFilters,
-                                       hasPermissions, setActiveFilter
+                                       hasPermissions
                                    }) {
     return (
 
