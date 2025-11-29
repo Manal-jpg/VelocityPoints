@@ -1,15 +1,12 @@
 import {Filter} from "lucide-react";
-import * as events from "node:events";
 
 export function TransactionFilters({
                                        showFilters,
                                        setShowFilters,
                                        quickFilters,
-                                       setActiveFilters,
-                                       activeFilters,
                                        advancedFilters,
                                        setAdvancedFilters,
-                                       hasPermissions
+                                       hasPermissions, setActiveFilter
                                    }) {
     return (
 
@@ -31,9 +28,12 @@ export function TransactionFilters({
                 {quickFilters.map((filter) => (
                     <button
                         key={filter.value}
-                        onClick={() => setActiveFilters([...activeFilters, filter.value])}
+                        onClick={() => setAdvancedFilters(
+                            advancedFilters.type === filter.value ? {...advancedFilters, type: "all"} :
+                                {...advancedFilters, type: filter.value}
+                        )}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                            activeFilters.includes(filter.value)
+                            advancedFilters.type === filter.value
                                 ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
                                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                         }`}
@@ -44,7 +44,7 @@ export function TransactionFilters({
             </div>
             {/*{advanced filters}*/}
             {showFilters && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-100 pt-5">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-100">
                     {/*{input label div}*/}
                     <div>
                         <label className={"block text-sm text-slate-600 mb-1.5"}> Search by Name/UtorId</label>
@@ -57,9 +57,12 @@ export function TransactionFilters({
                         <div>
                             <label className={"block text-sm text-slate-600 mb-1.5"}>Suspicious</label>
                             <select
-                                value={activeFilters.suspicious}
+                                value={advancedFilters.suspicious}
                                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500"
-                                onChange={(e) => setAdvancedFilters({...advancedFilters, suspicious: e.target.value === true})}
+                                onChange={(e) => setAdvancedFilters({
+                                    ...advancedFilters,
+                                    suspicious: e.target.value
+                                })}
                             >
                                 <option value="true">All</option>
                                 <option value="false">Suspicious</option>

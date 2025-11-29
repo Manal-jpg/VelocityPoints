@@ -61,3 +61,5 @@ frontend/.vite/
 
 # Temporary debug files
 frontend/*.local
+
+UI_REQS.md
