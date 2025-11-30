@@ -1,4 +1,4 @@
-import {Filter} from "lucide-react";
+import {Filter, X} from "lucide-react";
 
 export function TransactionFilters({
                                        showFilters,
@@ -6,8 +6,9 @@ export function TransactionFilters({
                                        quickFilters,
                                        advancedFilters,
                                        setAdvancedFilters,
-                                       hasPermissions
+                                       hasPermissions, setTransactionId, transactionId
                                    }) {
+
     return (
 
         <div className="bg-white rounded-2xl border border-slate-100 p-6">
@@ -25,59 +26,78 @@ export function TransactionFilters({
 
             {/* Quick Filter Pills - how to select multiple filters and highlight them */}
             <div className="flex flex-wrap gap-2 pb-5">
-                {quickFilters.map((filter) => (
-                    <button
-                        key={filter.value}
-                        onClick={() => setAdvancedFilters(
-                            advancedFilters.type === filter.value ? {...advancedFilters, type: "all"} :
-                                {...advancedFilters, type: filter.value}
-                        )}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                            advancedFilters.type === filter.value
-                                ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-                                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                        }`}
-                    >
-                        {filter.label}
-                    </button>
-                ))}
-            </div>
-            {/*{advanced filters}*/}
-            {showFilters && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-100">
-                    {/*{input label div}*/}
-                    <div>
-                        <label className={"block text-sm text-slate-600 mb-1.5"}> Search by Name/UtorId</label>
-                        <input type={"text"} value={advancedFilters.name} placeholder={"Search"}
-                               onChange={(e) => setAdvancedFilters({...advancedFilters, name: e.target.value})}
-                               className={"w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus: border-emerald-500"}/>
-                    </div>
+                {quickFilters.map((filter) => (<button
+                    key={filter.value}
+                    onClick={() => setAdvancedFilters(advancedFilters.type === filter.value ? {
+                        ...advancedFilters, type: "all"
+                    } : {...advancedFilters, type: filter.value})}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${advancedFilters.type === filter.value ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
+                >
+                    {filter.label}
+                </button>))}
 
-                    {hasPermissions(["manager", "superuser"]) && (
+                {/* Transaction ID Search */}
+                <div className="flex items-center gap-2">
+                    <input type={"number"} placeholder={"Find by ID"}
+                           value={transactionId}
+                           onChange={(e) => {
+                               setTransactionId(e.target.value);
+                           }}
+                           className="w-40 px-3 py-2 border border-slate-200 rounded-lg text-sm
+                            focus:outline-none focus:ring-2 focus:ring-emerald-500"/>
+
+                    {!isNaN(transactionId) && (
+                        <button onClick={() => setTransactionId('')} className="text-slate-400 hover:text-slate-600"
+                        >
+                            <X size={16}/>
+
+                        </button>
+
+
+                    )}
+
+                </div>
+
+            </div>
+
+
+            {/*{advanced filters}*/}
+            {showFilters && (<div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+                {/*{input label div}*/}
+                <div>
+                    <label className={"block text-sm text-slate-600 mb-1.5"}> Search by Name/UtorId</label>
+                    <input type={"text"} value={advancedFilters.name} placeholder={"Search"}
+                           onChange={(e) => setAdvancedFilters({...advancedFilters, name: e.target.value})}
+                           className={"w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus: border-emerald-500"}/>
+                </div>
+
+                {hasPermissions(["manager", "superuser"]) && (<div>
+
                         <div>
                             <label className={"block text-sm text-slate-600 mb-1.5"}>Suspicious</label>
                             <select
                                 value={advancedFilters.suspicious}
                                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500"
                                 onChange={(e) => setAdvancedFilters({
-                                    ...advancedFilters,
-                                    suspicious: e.target.value
+                                    ...advancedFilters, suspicious: e.target.value
                                 })}
                             >
-                                <option value="true">All</option>
-                                <option value="false">Suspicious</option>
-                                <option value="">Not Suspicious</option>
+                                <option value="">All</option>
+                                <option value="true">Suspicious</option>
+                                <option value="false">Not Suspicious</option>
 
                             </select>
                         </div>
 
-                    )
 
-                    }
+                    </div>
+
+                )
+
+                }
 
 
-                </div>
-            )}
+            </div>)}
 
 
         </div>)

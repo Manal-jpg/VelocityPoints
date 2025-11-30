@@ -1,13 +1,10 @@
 // transactions page
-import {Link, useNavigate, Navigate} from "react-router-dom";
-import {useState, useEffect, useMemo} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {AppLayout} from "../components/layout/Layout";
 import {useAuth} from "../hooks/useAuth";
-import {Plus, Filter} from "lucide-react";
 import {TransactionStats} from "../components/transaction/TransactionStats.jsx";
 import {TransactionFilters} from "../components/transaction/TransactionFilters.jsx";
 import {CreateTransactionButtons} from "../components/transaction/CreateTransactionButtons.jsx";
-import {TransactionCard} from "../components/transaction/TransactionCard.jsx";
 import {Pagination} from "../components/transaction/Pagination.jsx";
 import {TransactionList} from "../components/transaction/TransactionList.jsx";
 import {TransactionDetails} from "../components/transaction/TransactionDetails.jsx";
@@ -24,6 +21,7 @@ export default function Transactions() {
     const [showCreatePurchase, setShowCreatePurchase] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [transactions, setTransactions] = useState([])
+    const [transactionId, setTransactionId] = useState('')
 
 
     const [showFilters, setShowFilters] = useState(false);
@@ -50,9 +48,12 @@ export default function Transactions() {
     /// use Memo is > use effect for this case
     const filteredTransactions = useMemo(() => {
             return transactions.filter(t => {
+
+                if (transactionId !== '' && t.id !== parseInt(transactionId)) return false;
+
                 if (advancedFilters.type !== "all" && advancedFilters.type !== t.type) return false;
 
-                if (advancedFilters.name && !t.utorid.toLowerCase().includes(advancedFilters.name.toLowerCase())) return false
+                if (advancedFilters.name && !t.utorid?.toLowerCase().includes(advancedFilters.name.toLowerCase())) return false
 
                 return !(advancedFilters.suspicious !== "" && t.suspicious !== (advancedFilters.suspicious === "true"));
 
@@ -60,7 +61,7 @@ export default function Transactions() {
             })
         }
 
-        , [transactions, advancedFilters])
+        , [transactions, advancedFilters, transactionId])
     console.log(filteredTransactions)
 
     const refreshTransactions = async () => {
@@ -116,7 +117,9 @@ export default function Transactions() {
 
 
             {/*{transaction stats}*/}
-            <TransactionStats transactions={transactions}/>
+            {hasPermissions(['regular']) && (<TransactionStats transactions={transactions}/>
+
+            )}
 
             {/* Filter Section #################################################################################*/}
             <TransactionFilters showFilters={showFilters}
@@ -124,6 +127,8 @@ export default function Transactions() {
                                 quickFilters={quickFilters}
                                 advancedFilters={advancedFilters} setAdvancedFilters={setAdvancedFilters}
                                 hasPermissions={hasPermissions}
+                                setTransactionId={setTransactionId}
+                                transactionId={transactionId}
             />
 
             <TransactionList filteredTransactions={filteredTransactions} setSelectedTransaction={setSelectedTransaction}
@@ -133,13 +138,7 @@ export default function Transactions() {
             {selectedTransaction && (
                 <TransactionDetails transaction={selectedTransaction} hasPermissions={hasPermissions}
                                     onRefresh={refreshTransactions}
-                                    onClose={() => {
-                    setSelectedTransaction(null)
-                }
-
-                }
-
-
+                                    onClose={() => setSelectedTransaction(null)}
                 />)}
 
             {showCreatePurchase && (<CreateTransaction title={"Create Purchase"}

@@ -1,7 +1,7 @@
 import {X} from "lucide-react";
 import {CreateTransactionForm} from "./CreateTransactionForm";
 import {useState} from "react";
-import {createTransaction, createTransferTransaction, createRedemptionTransaction} from "../../api/transactions.js";
+import {createRedemptionTransaction, createTransaction, createTransferTransaction} from "../../api/transactions.js";
 
 const createData = (formData) => {
     if (formData.type === "purchase") {

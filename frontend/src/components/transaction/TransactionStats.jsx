@@ -1,8 +1,8 @@
 
 export function TransactionStats({transactions}) {
     const totalTransactions = transactions.length;
-    const pointsEarned = transactions.reduce((acc, t) => t.amount > 0 ? acc + t.amount : acc, 0);
-    const pointsSpent = transactions.reduce((acc, t) => t.amount < 0 ? acc + t.amount : acc, 0);
+    const pointsEarned = transactions.reduce((acc, t) => (t.amount > 0 && !t.suspicious) ? acc + t.amount : acc, 0);
+    const pointsSpent = transactions.reduce((acc, t) => (t.amount < 0 && !t.suspicious) ? acc + t.amount : acc, 0);
     const netEarned = pointsEarned + pointsSpent;
 
     return (
