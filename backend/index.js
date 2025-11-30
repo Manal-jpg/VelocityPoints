@@ -1678,12 +1678,14 @@ app.get("/transactions", need("manager", "superuser"), async (req, res) => {
         remark: t.remark,
         createdBy: t.createdBy.utorid,
       };
-
       if (t.type === "purchase") {
         temp.spent = t.spent;
       } else if (t.type === "redemption") {
         temp.redeemed = t.redeemed;
         temp.relatedId = t.processedById;
+        // Modifications made here to expose the processed variable
+          temp.processed = t.processed;
+          temp.processedBy = t.processedBy;
       } else if (t.type === "adjustment") {
         temp.relatedId = t.relatedTransactionId;
       } else if (t.type === "transfer") {

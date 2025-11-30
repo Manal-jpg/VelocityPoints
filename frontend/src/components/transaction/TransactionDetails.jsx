@@ -2,6 +2,8 @@ import {
     AlertTriangle,
     ArrowRightLeft,
     Calendar,
+    CircleCheck,
+    CircleOff,
     DollarSign,
     Gift,
     Hash,
@@ -11,7 +13,7 @@ import {
     User,
     X
 } from "lucide-react";
-import {toggleTransactionSuspicious} from "../../api/transactions.js";
+import {processRedemptionTransaction, toggleTransactionSuspicious} from "../../api/transactions.js";
 import {useState} from "react";
 
 // Format ISO date to readable format
@@ -62,6 +64,7 @@ const getTransactionTitle = (type) => {
 // set Selected Transaction - the use State decides which is this card will be rendered
 export function TransactionDetails({transaction, onClose, hasPermissions, onRefresh}) {
     const [isSuspicious, setisSuspicious] = useState(transaction?.suspicious);
+    const [processed, setProcessed] = useState(transaction?.processed);
     const [loading, setLoading] = useState(false);
     if (!transaction) return null
     const bgColor = getTransactionColor(transaction.type);
@@ -85,6 +88,26 @@ export function TransactionDetails({transaction, onClose, hasPermissions, onRefr
             setLoading(false);
 
         }
+
+    }
+
+    const processRedemption = async () => {
+        const payload = {processed: processed};
+        const transactionId = transaction.id;
+        try {
+            const res = processRedemptionTransaction(payload, transactionId);
+            console.log(res);
+            setProcessed(true)
+            onRefresh();
+        } catch (err) {
+            console.error('Failed to Process Redemption:', err);
+            alert(err.message);
+
+        } finally {
+            setLoading(false);
+
+        }
+
 
     }
 
@@ -192,6 +215,39 @@ export function TransactionDetails({transaction, onClose, hasPermissions, onRefr
                                     </select>
 
                                 </div>
+                            </div>
+
+
+                        )}
+                        {/*Process Redemption Transaction*/}
+                        {transaction.type === "redemption" && hasPermissions(["manager", "superuser", "cashier"]) && (
+                            <div className="flex items-center gap-3 border border-slate-100 rounded-lg p-3">
+                                {processed ? (<CircleCheck size={20}/>) : (<CircleOff size={20}/>)}
+
+                                <div className="flex-1">
+                                    <p className="text-xs text-slate-500 mb-1">Redemption Status</p>
+
+                                    <select value={processed ? "true" : "false"}
+                                            disabled={loading}
+                                            onChange={async (event) => {
+                                                const bool = event.target.value === "true";
+                                                if (bool && bool !== processed) {
+                                                    setLoading(true);
+                                                    await processRedemption();
+                                                }
+
+                                            }}
+
+                                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900
+                                                 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white cursor-pointer">
+
+                                        <option value="true">Processed</option>
+                                        <option value="false" disabled>Not Processed</option>
+
+
+                                    </select>
+                                </div>
+
                             </div>
 
 
