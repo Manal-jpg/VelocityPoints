@@ -22,14 +22,26 @@ export default function Transactions() {
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [transactions, setTransactions] = useState([])
     const [transactionId, setTransactionId] = useState('')
-
-
     const [showFilters, setShowFilters] = useState(false);
+    // implementing pagination here
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [limit, setLimit] = useState(20);
+    const totalPages = Math.ceil(totalCount / limit);
 
 
     // pagination is not included here
     const [advancedFilters, setAdvancedFilters] = useState({
-        name: "", createdBy: "", suspicious: "", promotionId: "", relatedId: "", amount: 0, operator: "", type: "all"
+        name: "",
+        createdBy: "",
+        suspicious: "",
+        promotionId: "",
+        relatedId: "",
+        amount: 0,
+        operator: "",
+        type: "all",
+        page: currentPage,
+        limit: limit
     });
 
     const quickFilters = [{value: "all", label: "All Transactions"}, {
@@ -94,8 +106,9 @@ export default function Transactions() {
             setError('');
 
             try {
-                const data = await getAllTransactions({}); // Your API call
+                const data = await getAllTransactions({params: {page: currentPage, limit: limit}}); // Your API call
                 setTransactions(data.results || []); // Adjust based on your API response
+                setTotalCount(data.count || 0);
             } catch (err) {
                 setError(err.message);
                 console.error('Failed to fetch transactions:', err);
@@ -105,7 +118,7 @@ export default function Transactions() {
         };
 
         fetchTransactions();
-    }, []); // Empty array = run once on mount
+    }, [currentPage, limit]); // Empty array = run once on mount
 
 
     if (loading) {
@@ -147,6 +160,7 @@ export default function Transactions() {
                                 hasPermissions={hasPermissions}
                                 setTransactionId={setTransactionId}
                                 transactionId={transactionId}
+                                page={currentPage} setPage={setCurrentPage} limit={limit} setLimit={setLimit}
             />
 
             <TransactionList filteredTransactions={filteredTransactions} setSelectedTransaction={setSelectedTransaction}
@@ -186,7 +200,9 @@ export default function Transactions() {
             }
 
             {/*{Pagination to be fixed - currently not working}*/}
-            <Pagination/>
+            <Pagination currentPage={currentPage} setCurrentPage={setCurrentPage} limit={limit} setLimit={setLimit}
+                        totalPages={totalPages}
+            />
 
         </AppLayout>);
 }

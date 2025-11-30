@@ -8,7 +8,8 @@ export function TransactionFilters({
                                        setAdvancedFilters,
                                        hasPermissions,
                                        setTransactionId,
-                                       transactionId
+                                       transactionId,
+                                       currentPage, setCurrentPage, limit, setLimit,
                                    }) {
 
     return (
@@ -246,11 +247,9 @@ export function TransactionFilters({
                         <input
                             type="number"
                             min="1"
-                            value={advancedFilters.page}
+                            value={currentPage}
                             placeholder="1"
-                            onChange={(e) => setAdvancedFilters({
-                                ...advancedFilters, page: e.target.value
-                            })}
+                            onChange={(e) => setCurrentPage(parseInt(e.target.value, 10))}
                             className="w-full px-3 py-2 border border-slate-200 rounded-lg
   text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         />
@@ -262,10 +261,8 @@ export function TransactionFilters({
                             Results Per Page
                         </label>
                         <select
-                            value={advancedFilters.limit}
-                            onChange={(e) => setAdvancedFilters({
-                                ...advancedFilters, limit: e.target.value
-                            })}
+                            value={limit}
+                            onChange={(e) => setLimit(parseInt(e.target.value, 10))}
                             className="w-full px-3 py-2 border border-slate-200 rounded-lg
   text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white cursor-pointer"
                         >
