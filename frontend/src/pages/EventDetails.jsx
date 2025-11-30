@@ -14,6 +14,12 @@ export default function EventDetails() {
 
   const [addUtorid, setAddUtorid] = useState("");
   const [adding, setAdding] = useState(false);
+  const [awardAll, setAwardAll] = useState(true);
+  const [awardUtorid, setAwardUtorid] = useState("");
+  const [awardPoints, setAwardPoints] = useState("");
+  const [awardRemark, setAwardRemark] = useState("");
+  const [awarding, setAwarding] = useState(false);
+  const [awardError, setAwardError] = useState("");
 
   const isManagerPlus = ["manager", "superuser"].includes(
     user?.role?.toLowerCase()
@@ -148,6 +154,46 @@ export default function EventDetails() {
     }
   };
 
+  const handleAward = async () => {
+    setAwardError("");
+    const pts = Number(awardPoints);
+    if (!Number.isInteger(pts) || pts <= 0) {
+      setAwardError("Points must be a positive whole number.");
+      return;
+    }
+    if (!awardAll && !awardUtorid.trim()) {
+      setAwardError("Enter a UTORid to award a single guest.");
+      return;
+    }
+
+    try {
+      setAwarding(true);
+      const payload = {
+        type: "event",
+        amount: pts,
+        remark: awardRemark || undefined,
+      };
+      if (!awardAll) payload.utorid = awardUtorid.trim();
+
+      await api.post(`/events/${id}/transactions`, payload);
+      alert("Points awarded.");
+      // optionally refresh event stats
+      loadEvent();
+      setAwardPoints("");
+      setAwardRemark("");
+      if (!awardAll) setAwardUtorid("");
+    } catch (err) {
+      console.error("AWARD ERROR:", err);
+      const msg =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Unable to award points.";
+      setAwardError(msg);
+    } finally {
+      setAwarding(false);
+    }
+  };
+
   if (loading) {
     return (
       <AppLayout title="Event Details">
@@ -269,6 +315,78 @@ export default function EventDetails() {
                 className="px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm font-medium shadow-sm hover:bg-emerald-600 disabled:opacity-50"
               >
                 {adding ? "Adding..." : "Add Guest"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {(isManagerPlus || isOrganizer) && (
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-slate-900">Award Points</h3>
+              <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={awardAll}
+                  onChange={(e) => setAwardAll(e.target.checked)}
+                  className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                Award all guests
+              </label>
+            </div>
+
+            {!awardAll && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="text-sm text-slate-600">Guest UTORid</label>
+                  <input
+                    type="text"
+                    value={awardUtorid}
+                    onChange={(e) => setAwardUtorid(e.target.value)}
+                    placeholder="Enter guest UTORid"
+                    className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm text-slate-600">Points to award</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={awardPoints}
+                  onChange={(e) => setAwardPoints(e.target.value)}
+                  placeholder="e.g. 50"
+                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-slate-600">Remark (optional)</label>
+                <input
+                  type="text"
+                  value={awardRemark}
+                  onChange={(e) => setAwardRemark(e.target.value)}
+                  placeholder="Reason or note"
+                  className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+
+            {awardError && (
+              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                {awardError}
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                onClick={handleAward}
+                disabled={awarding}
+                className="px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm font-medium shadow-sm hover:bg-emerald-600 disabled:opacity-50"
+              >
+                {awarding ? "Awarding..." : "Award Points"}
               </button>
             </div>
           </div>
