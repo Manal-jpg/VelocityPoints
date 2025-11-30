@@ -45,23 +45,41 @@ export default function Transactions() {
         }
         return role.includes(user.role);
     }
-    /// use Memo is > use effect for this case
+
     const filteredTransactions = useMemo(() => {
-            return transactions.filter(t => {
+        return transactions.filter(t => {
+            // ID search (exact match - highest priority)
+            if (transactionId !== '' && !t.id.toString().includes(transactionId)) return false;
 
-                if (transactionId !== '' && t.id !== parseInt(transactionId)) return false;
+            // Type filter
+            if (advancedFilters.type !== "all" && advancedFilters.type !== t.type) return false;
 
-                if (advancedFilters.type !== "all" && advancedFilters.type !== t.type) return false;
+            // Name filter
+            if (advancedFilters.name && t.utorid && !t.utorid.toLowerCase().includes(advancedFilters.name.toLowerCase())) return false;
 
-                if (advancedFilters.name && !t.utorid?.toLowerCase().includes(advancedFilters.name.toLowerCase())) return false
+            // Created By filter
+            if (advancedFilters.createdBy && t.createdBy && !t.createdBy.toLowerCase().includes(advancedFilters.createdBy.toLowerCase())) return false;
 
-                return !(advancedFilters.suspicious !== "" && t.suspicious !== (advancedFilters.suspicious === "true"));
+            // Suspicious filter
+            if (advancedFilters.suspicious !== "" && t.suspicious !== (advancedFilters.suspicious === "true")) return false;
 
+            // Promotion ID filter
+            if (advancedFilters.promotionId && t.promotionIds && !t.promotionIds.includes(parseInt(advancedFilters.promotionId))) return false;
 
-            })
-        }
+            // Related ID filter
+            if (advancedFilters.relatedId && t.relatedId !== parseInt(advancedFilters.relatedId)) return false;
 
-        , [transactions, advancedFilters, transactionId])
+            // Amount filter with operator
+            if (advancedFilters.operator && advancedFilters.amount) {
+                const amount = parseInt(advancedFilters.amount);
+                if (advancedFilters.operator === 'gte' && t.amount < amount) return false;
+                if (advancedFilters.operator === 'lte' && t.amount > amount) return false;
+                if (advancedFilters.operator === 'eq' && t.amount !== amount) return false;
+            }
+
+            return true;
+        });
+    }, [transactions, advancedFilters, transactionId]);
     console.log(filteredTransactions)
 
     const refreshTransactions = async () => {

@@ -1,5 +1,15 @@
 import {
-    X, ShoppingCart, Gift, ArrowRightLeft, Settings, Calendar, User, Hash, Clock, DollarSign, Tag, AlertTriangle
+    AlertTriangle,
+    ArrowRightLeft,
+    Calendar,
+    DollarSign,
+    Gift,
+    Hash,
+    Settings,
+    ShoppingCart,
+    Tag,
+    User,
+    X
 } from "lucide-react";
 import {toggleTransactionSuspicious} from "../../api/transactions.js";
 import {useState} from "react";
