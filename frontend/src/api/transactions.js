@@ -23,8 +23,8 @@ export async function getTransactionById(transactionId) {
 }
 
 // change suspicious status
-export async function toggleTransactionSuspicious(payload) {
-    const res = await api.patch("/transactions/suspicious", payload);
+export async function toggleTransactionSuspicious(payload, transactionId) {
+    const res = await api.patch(`/transactions/${transactionId}/suspicious`, payload);
     return res.data;
 }
 

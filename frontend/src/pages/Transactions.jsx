@@ -131,7 +131,16 @@ export default function Transactions() {
             />
 
             {selectedTransaction && (
-                <TransactionDetails transaction={selectedTransaction} onClose={() => setSelectedTransaction(null)}/>)}
+                <TransactionDetails transaction={selectedTransaction} hasPermissions={hasPermissions}
+                                    onRefresh={refreshTransactions}
+                                    onClose={() => {
+                    setSelectedTransaction(null)
+                }
+
+                }
+
+
+                />)}
 
             {showCreatePurchase && (<CreateTransaction title={"Create Purchase"}
                                                        onClose={() => setShowCreatePurchase(false)} type={"purchase"}

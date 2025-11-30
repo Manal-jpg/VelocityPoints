@@ -1,52 +1,37 @@
 import {
-    X,
-    ShoppingCart,
-    Gift,
-    ArrowRightLeft,
-    Settings,
-    Calendar,
-    User,
-    Hash,
-    Clock,
-    DollarSign,
-    Tag
+    X, ShoppingCart, Gift, ArrowRightLeft, Settings, Calendar, User, Hash, Clock, DollarSign, Tag, AlertTriangle
 } from "lucide-react";
+import {toggleTransactionSuspicious} from "../../api/transactions.js";
+import {useState} from "react";
 
 // Format ISO date to readable format
 const formatDate = (isoDate) => {
     const date = new Date(isoDate);
     return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric"
+        month: "short", day: "numeric", year: "numeric"
     });
 };
 
 const formatTime = (isoDate) => {
     const date = new Date(isoDate);
     return date.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit"
+        hour: "numeric", minute: "2-digit"
     });
 };
 
 const renderIcon = (type) => {
-    if (type === "purchase") return <ShoppingCart size={25} />;
-    if (type === "transfer") return <ArrowRightLeft size={25} />;
-    if (type === "event") return <Calendar size={25} />;
-    if (type === "redemption") return <Gift size={25} />;
-    if (type === "adjustment") return <Settings size={25} />;
-    return <ShoppingCart size={25} />
+    if (type === "purchase") return <ShoppingCart size={25}/>;
+    if (type === "transfer") return <ArrowRightLeft size={25}/>;
+    if (type === "event") return <Calendar size={25}/>;
+    if (type === "redemption") return <Gift size={25}/>;
+    if (type === "adjustment") return <Settings size={25}/>;
+    return <ShoppingCart size={25}/>
 }
 
 // Get background color for transaction type
 const getTransactionColor = (type) => {
     const colors = {
-        purchase: "#10b981",
-        redemption: "#ef4444",
-        transfer: "#3b82f6",
-        adjustment: "#8b5cf6",
-        event: "#ec4899"
+        purchase: "#10b981", redemption: "#ef4444", transfer: "#3b82f6", adjustment: "#8b5cf6", event: "#ec4899"
     };
     return colors[type] || "#10b981";
 };
@@ -63,20 +48,44 @@ const getTransactionTitle = (type) => {
     return titles[type] || "Transaction";
 };
 
-// set Selected Transaction - the use State decides which is this card will be rendered
-export function TransactionDetails({transaction, onClose}) {
-    if (!transaction) return null
 
+// set Selected Transaction - the use State decides which is this card will be rendered
+export function TransactionDetails({transaction, onClose, hasPermissions, onRefresh}) {
+    const [isSuspicious, setisSuspicious] = useState(transaction?.suspicious);
+    const [loading, setLoading] = useState(false);
+    if (!transaction) return null
     const bgColor = getTransactionColor(transaction.type);
 
-    return (
-        // Modal overlay
+    // API CALL GOES HERE
+
+    const toggleSuspicious = async () => {
+        const payload = {suspicious: !isSuspicious};
+        const transactionId = transaction.id;
+        try {
+            const response = await toggleTransactionSuspicious(payload, transactionId);
+            console.log(response);
+            setisSuspicious(!isSuspicious)
+            onRefresh();
+
+        } catch (err) {
+            console.error('Failed to toggle:', err);
+            alert(err.message);
+
+        } finally {
+            setLoading(false);
+
+        }
+
+    }
+
+    return (// Modal overlay
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
             {/* Modal content */}
-            <div onClick={e => e.stopPropagation()} className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl ">
+            <div onClick={e => e.stopPropagation()}
+                 className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl ">
 
                 {/* Header Section with colored background */}
-                <div className="p-6 text-white relative" style={{ backgroundColor: bgColor }}>
+                <div className="p-6 text-white relative" style={{backgroundColor: bgColor}}>
                     <div className="flex items-start gap-3">
                         <span className="text-4xl">{renderIcon(transaction.type)}</span>
                         <div className="flex-1">
@@ -87,7 +96,7 @@ export function TransactionDetails({transaction, onClose}) {
                             onClick={onClose}
                             className="text-white/90 hover:text-white hover:bg-white/20 rounded-lg p-1 transition"
                         >
-                            <X size={24} />
+                            <X size={24}/>
                         </button>
                     </div>
                 </div>
@@ -109,7 +118,7 @@ export function TransactionDetails({transaction, onClose}) {
                     <div className="space-y-4">
                         {/* Customer */}
                         <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
-                            <User size={20} className="text-slate-400 mt-0.5" />
+                            <User size={20} className="text-slate-400 mt-0.5"/>
                             <div>
                                 <p className="text-xs text-slate-500 mb-1">Customer</p>
                                 <p className="text-base text-slate-900">{transaction.utorid}</p>
@@ -129,7 +138,7 @@ export function TransactionDetails({transaction, onClose}) {
 
                         {/* Amount Spent */}
                         <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
-                            <DollarSign size={20} className="text-slate-400 mt-0.5" />
+                            <DollarSign size={20} className="text-slate-400 mt-0.5"/>
                             <div>
                                 <p className="text-xs text-slate-500 mb-1">Amount Spent</p>
                                 <p className="text-base text-slate-900">
@@ -137,13 +146,55 @@ export function TransactionDetails({transaction, onClose}) {
                                 </p>
                             </div>
                         </div>
+
+                        {/*Toggle Suspicious*/}
+                        {hasPermissions(["manager", "superuser"]) && (
+
+                            <div className="flex items-center gap-3 border border-slate-100 rounded-lg p-3">
+                                {/*sets color*/}
+                                <AlertTriangle size={20}
+                                               className={isSuspicious ? "text-red-500" : "text-slate-400"}
+                                />
+
+                                <div className="flex-1">
+                                    <p className="text-xs text-slate-500 mb-1">Suspicious Status</p>
+
+                                    {/*toggle sus*/}
+                                    <select value={isSuspicious ? "true" : "false"}
+                                            disabled={loading}
+
+                                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900
+                                                 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white cursor-pointer"
+
+                                            onChange={async (event) => {
+                                                const bool = event.target.value === "true";
+                                                if (bool !== isSuspicious) {
+                                                    setLoading(true);
+                                                    await toggleSuspicious();
+
+                                                }
+
+                                            }}
+
+                                    >
+                                        <option value="true">Suspicious</option>
+                                        <option value="false">Not Suspicious</option>
+                                    </select>
+
+                                </div>
+                            </div>
+
+
+                        )}
+
+
                     </div>
 
                     {/* Right Column */}
                     <div className="space-y-4">
                         {/* Transaction ID */}
                         <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
-                            <Hash size={20} className="text-slate-400 mt-0.5" />
+                            <Hash size={20} className="text-slate-400 mt-0.5"/>
                             <div>
                                 <p className="text-xs text-slate-500 mb-1">Transaction ID</p>
                                 <p className="text-base text-slate-900">#{transaction.id}</p>
@@ -152,7 +203,7 @@ export function TransactionDetails({transaction, onClose}) {
 
                         {/* Created By */}
                         <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
-                            <User size={20} className="text-slate-400 mt-0.5" />
+                            <User size={20} className="text-slate-400 mt-0.5"/>
                             <div>
                                 <p className="text-xs text-slate-500 mb-1">Created By</p>
                                 <p className="text-base text-slate-900">
@@ -163,16 +214,19 @@ export function TransactionDetails({transaction, onClose}) {
 
                         {/* Promotions Applied */}
                         <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
-                            <Tag size={20} className="text-slate-400 mt-0.5" />
+                            <Tag size={20} className="text-slate-400 mt-0.5"/>
                             <div>
                                 <p className="text-xs text-slate-500 mb-1">Promotions Applied</p>
                                 <p className="text-base text-slate-900">
-                                    {transaction.promotionIds.reduce((acc, currentValue) => acc + " " + "#" + currentValue+ " ", "")}
+                                    {transaction.promotionIds.reduce((acc, currentValue) => acc + " " + "#" + currentValue + " ", "")}
                                 </p>
                             </div>
                         </div>
+
+
                     </div>
                 </div>
+
 
                 {/* Close Button */}
                 <div className="px-6 pb-6">
@@ -184,8 +238,7 @@ export function TransactionDetails({transaction, onClose}) {
                     </button>
                 </div>
             </div>
-        </div>
-    )
+        </div>)
 
 
 }
