@@ -103,7 +103,7 @@ export default function Login() {
         <div className="hidden lg:flex lg:flex-col lg:w-1/2 bg-white border border-slate-100 rounded-3xl px-12 py-10 mr-6">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xl">
-              ⚡
+              PV
             </div>
             <span className="text-xl font-semibold text-slate-900">
               PointsVelocity
@@ -138,7 +138,7 @@ export default function Login() {
             {/* Brand for mobile */}
             <div className="mb-10 lg:hidden flex items-center gap-3">
               <div className="h-9 w-9 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xl">
-                ⚡
+                PV
               </div>
               <span className="text-xl font-semibold text-slate-900">
                 PointsVelocity
@@ -173,30 +173,32 @@ export default function Login() {
                 Use your assigned UTORid and password to access the portal.
               </p>
 
-            {(localError || error) && (
-              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                {localError || error}
-              </div>
-            )}
-            {resetError && (
-              <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                {resetError}
-              </div>
-            )}
-            {resetInfo && (
-              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800">
-                <p className="font-semibold">Reset token generated</p>
-                <p className="break-all text-slate-700">{resetInfo.resetToken}</p>
-                {resetInfo.expiresAt && (
-                  <p className="text-xs text-slate-500 mt-1">
-                    Expires: {new Date(resetInfo.expiresAt).toLocaleString()}
+              {(localError || error) && (
+                <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {localError || error}
+                </div>
+              )}
+              {resetError && (
+                <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {resetError}
+                </div>
+              )}
+              {resetInfo && (
+                <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800">
+                  <p className="font-semibold">Reset token generated</p>
+                  <p className="break-all text-slate-700">
+                    {resetInfo.resetToken}
                   </p>
-                )}
-                <p className="text-xs text-slate-500 mt-2">
-                  Paste this token on the reset page to set a new password.
-                </p>
-              </div>
-            )}
+                  {resetInfo.expiresAt && (
+                    <p className="text-xs text-slate-500 mt-1">
+                      Expires: {new Date(resetInfo.expiresAt).toLocaleString()}
+                    </p>
+                  )}
+                  <p className="text-xs text-slate-500 mt-2">
+                    Paste this token on the reset page to set a new password.
+                  </p>
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div>
@@ -253,7 +255,10 @@ export default function Login() {
                   </button>
                   <p className="text-xs text-slate-500 text-center">
                     Already have a token?{" "}
-                    <Link to="/reset" className="text-emerald-600 hover:underline">
+                    <Link
+                      to="/reset"
+                      className="text-emerald-600 hover:underline"
+                    >
                       Go to reset page
                     </Link>
                     .

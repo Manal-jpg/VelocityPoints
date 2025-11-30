@@ -52,7 +52,6 @@ function ManagerRoute({ children }) {
 export default function App() {
   return (
     <Routes>
-
       {/* PUBLIC ROUTES */}
       <Route
         path="/login"
@@ -65,14 +64,7 @@ export default function App() {
       <Route path="/reset" element={<ResetPassword />} />
 
       {/* PROTECTED ROUTES */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/" element={<Navigate to="/events" replace />} />
 
       <Route
         path="/profile"
@@ -206,7 +198,6 @@ export default function App() {
 
       {/* CATCH ALL */}
       <Route path="*" element={<Navigate to="/" replace />} />
-
     </Routes>
   );
 }

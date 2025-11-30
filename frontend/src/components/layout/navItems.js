@@ -2,7 +2,6 @@ import {
   CalendarRange,
   ClipboardCheck,
   Gift,
-  Home,
   PlusCircle,
   QrCode,
   Receipt,
@@ -38,8 +37,7 @@ export const getNavItems = (user) => {
   const isCashier = hasRole("cashier") || isManager;
   const isRegular = hasRole("regular") && !isCashier && !isManager;
 
-  // All role groups get this:
-  const items = [{ icon: Home, label: "Dashboard", path: "/" }];
+  const items = [];
 
   const add = (item) => {
     if (!items.some((nav) => nav.path === item.path)) {
@@ -47,71 +45,38 @@ export const getNavItems = (user) => {
     }
   };
 
-  /**
-   * REGULAR USER NAVIGATION
-   */
+  // Regular user navigation
   if (isRegular) {
     add({ icon: Wallet, label: "My Points", path: "/points" });
     add({ icon: QrCode, label: "My QR Code", path: "/qr" });
     add({ icon: Send, label: "Transfer Points", path: "/transfer" });
     add({ icon: Gift, label: "Redeem Points", path: "/redemptions/request" });
-    add({
-      icon: ClipboardCheck,
-      label: "Redemption QR",
-      path: "/redemptions/pending",
-    });
+    add({ icon: ClipboardCheck, label: "Redemption QR", path: "/redemptions/pending" });
     add({ icon: Tag, label: "Promotions", path: "/promotions" });
-
-    // ✔ FIX: Regular users go to /events
     add({ icon: CalendarRange, label: "Events", path: "/events" });
-
     add({ icon: Receipt, label: "My Transactions", path: "/transactions" });
   }
 
-  /**
-   * CASHIER NAVIGATION
-   */
+  // Cashier navigation
   if (isCashier) {
-    add({
-      icon: PlusCircle,
-      label: "New Transaction",
-      path: "/cashier/transactions/new",
-    });
-    add({
-      icon: ClipboardCheck,
-      label: "Process Redemption",
-      path: "/cashier/redemptions/process",
-    });
-
-    // ✔ FIX: Cashiers also use the SAME Events page
+    add({ icon: PlusCircle, label: "New Transaction", path: "/cashier/transactions/new" });
+    add({ icon: ClipboardCheck, label: "Process Redemption", path: "/cashier/redemptions/process" });
     add({ icon: CalendarRange, label: "Events", path: "/events" });
   }
 
-  /**
-   * MANAGER NAVIGATION
-   */
+  // Manager navigation
   if (isManager) {
     add({ icon: Users, label: "Users", path: "/manager/users" });
-    add({
-      icon: Receipt,
-      label: "All Transactions",
-      path: "/manager/transactions",
-    });
+    add({ icon: Receipt, label: "All Transactions", path: "/manager/transactions" });
     add({ icon: Tag, label: "Promotions", path: "/manager/promotions" });
-
-    // ❌ BEFORE: /manager/events (DOES NOT EXIST → blank page)
-    // ✔ NOW: Managers also use /events
     add({ icon: CalendarRange, label: "Events", path: "/events" });
+    add({ icon: PlusCircle, label: "Create Event", path: "/manager/events/new" });
   }
 
-  /**
-   * UNIVERSAL LINKS
-   */
+  // Universal
   add({ icon: User, label: "Profile", path: "/profile" });
 
-  /**
-   * SUPERUSER NAVIGATION
-   */
+  // Superuser
   if (isSuperuser) {
     add({ icon: ShieldCheck, label: "Role Management", path: "/admin/roles" });
   }
