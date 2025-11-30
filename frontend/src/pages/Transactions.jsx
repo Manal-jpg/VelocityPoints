@@ -12,6 +12,7 @@ import {Pagination} from "../components/transaction/Pagination.jsx";
 import {TransactionList} from "../components/transaction/TransactionList.jsx";
 import {TransactionDetails} from "../components/transaction/TransactionDetails.jsx";
 import {CreateTransaction} from "../components/transaction/CreateTransaction.jsx"
+import {getAllTransactions} from "../api/transactions.js";
 
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
@@ -19,32 +20,35 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:300
 
 export default function Transactions() {
     const {user} = useAuth();
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [showCreateAdjustment, setShowCreateAdjustment] = useState(false);
     const [showCreateRedemption, setShowCreateRedemption] = useState(false);
     const [showCreateTransfer, setShowCreateTransfer] = useState(false);
     const [showCreatePurchase, setShowCreatePurchase] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
-    const [transactions, setTransactions] = useState([
-            {
-                "id": 2,
-                "type": "redemption",
-                "amount": -500,
-                "redeemed": 500,
-                "utorid": "johndoe1",
-                "processed": false,
-                "processedById": null,
-                "remark": "Gift card",
-                "createdBy": "johndoe1",
-                "createdAt": "2025-11-12T16:15:00Z",
-                "promotionIds": [1,2,3]
-            }
+    const [transactions, setTransactions] = useState([{
+        "id": 2,
+        "type": "redemption",
+        "amount": -500,
+        "redeemed": 500,
+        "utorid": "johndoe1",
+        "processed": false,
+        "processedById": null,
+        "remark": "Gift card",
+        "createdBy": "johndoe1",
+        "createdAt": "2025-11-12T16:15:00Z",
+        "promotionIds": [1, 2, 3]
+    }
 
 
     ])
 
 
+
+
+
     const [showFilters, setShowFilters] = useState(false);
-    const [activeTypeFilter, setActiveTypeFilter] = useState("");
 
 
     // pagination is not included here
@@ -53,11 +57,9 @@ export default function Transactions() {
     });
 
     const quickFilters = [{value: "all", label: "All Transactions"}, {
-        value: "purchase",
-        label: "Purchases"
+        value: "purchase", label: "Purchases"
     }, {value: "redemption", label: "Redemptions"}, {value: "transfer", label: "Transfers"}, {
-        value: "adjustment",
-        label: "Adjustments"
+        value: "adjustment", label: "Adjustments"
     }, {value: "event", label: "Event Points"}]
 
     const hasPermissions = (role) => {
@@ -68,8 +70,7 @@ export default function Transactions() {
         return role.includes(user.role);
     }
     /// use Memo is > use effect for this case
-    const filteredTransactions = useMemo(
-        () => {
+    const filteredTransactions = useMemo(() => {
             return transactions.filter(t => {
                 if (advancedFilters.type !== "all" && advancedFilters.type !== t.type) return false;
 
@@ -84,6 +85,53 @@ export default function Transactions() {
         , [transactions, advancedFilters])
     console.log(filteredTransactions)
 
+    const refreshTransactions = async () => {
+        const reqParams = {...advancedFilters, type: advancedFilters.type === "all" ? null : advancedFilters.type};
+        const newTransactions = await getAllTransactions(reqParams);
+        setTransactions(newTransactions);
+    }
+
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            setLoading(true);
+            setError('');
+
+            try {
+                const data = await getAllTransactions({}); // Your API call
+                setTransactions(data.results || data); // Adjust based on your API response
+            } catch (err) {
+                setError(err.message);
+                console.error('Failed to fetch transactions:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTransactions();
+    }, []); // Empty array = run once on mount
+
+
+
+    if (loading) {
+        return (
+            <AppLayout title="Transactions">
+                <div className="flex justify-center items-center h-64">
+                    <p className="text-slate-500">Loading transactions...</p>
+                </div>
+            </AppLayout>
+        );
+    }
+
+    // Show error state
+    if (error) {
+        return (
+            <AppLayout title="Transactions">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p className="text-red-600">{error}</p>
+                </div>
+            </AppLayout>
+        );
+    }
 
     return (
 
@@ -98,9 +146,9 @@ export default function Transactions() {
             <TransactionStats transactions={transactions}/>
 
             {/* Filter Section #################################################################################*/}
-            <TransactionFilters showFilters={showFilters} activeFilters={activeTypeFilter}
+            <TransactionFilters showFilters={showFilters}
                                 setShowFilters={setShowFilters}
-                                setActiveFilter={setActiveTypeFilter} quickFilters={quickFilters}
+                                quickFilters={quickFilters}
                                 advancedFilters={advancedFilters} setAdvancedFilters={setAdvancedFilters}
                                 hasPermissions={hasPermissions}
             />
@@ -110,34 +158,31 @@ export default function Transactions() {
             />
 
             {selectedTransaction && (
-                <TransactionDetails transaction={selectedTransaction} onClose={() => setSelectedTransaction(null)}/>
-            )}
+                <TransactionDetails transaction={selectedTransaction} onClose={() => setSelectedTransaction(null)}/>)}
 
-            {showCreatePurchase && (
-                <CreateTransaction title={"Create Purchase"}
-                                   onClose={() => setShowCreatePurchase(false)} type={"purchase"}> </CreateTransaction>
-            )
+            {showCreatePurchase && (<CreateTransaction title={"Create Purchase"}
+                                                       onClose={() => setShowCreatePurchase(false)} type={"purchase"}
+                                                       onSucess={refreshTransactions}> </CreateTransaction>)
 
             }
 
-            {showCreateTransfer && (
-                <CreateTransaction title={"Create Transfer"}
-                                   onClose={() => setShowCreateTransfer(false)} type={"transfer"}> </CreateTransaction>
-            )
+            {showCreateTransfer && (<CreateTransaction title={"Create Transfer"}
+                                                       onClose={() => setShowCreateTransfer(false)} type={"transfer"}
+                                                       onSucess={refreshTransactions()}> </CreateTransaction>)
 
             }
 
-            {showCreateRedemption && (
-                <CreateTransaction title={"Create Redemption"}
-                                   onClose={() => setShowCreateRedemption(false)} type={"redemption"}> </CreateTransaction>
-            )
+            {showCreateRedemption && (<CreateTransaction title={"Create Redemption"}
+                                                         onClose={() => setShowCreateRedemption(false)}
+                                                         type={"redemption"}
+                                                         onSucess={refreshTransactions()}> </CreateTransaction>)
 
             }
 
-            {showCreateAdjustment && (
-                <CreateTransaction title={"Create Adjustment"}
-                                   onClose={() => setShowCreateAdjustment(false)} type={"adjustment"}> </CreateTransaction>
-            )
+            {showCreateAdjustment && (<CreateTransaction title={"Create Adjustment"}
+                                                         onClose={() => setShowCreateAdjustment(false)}
+                                                         type={"adjustment"}
+                                                         onSucess={refreshTransactions}> </CreateTransaction>)
 
             }
 

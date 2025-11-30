@@ -43,7 +43,7 @@ export async function createRedemptionTransaction(payload) {
 }
 
 export async function getUserTransactions(params = {}) {
-    const res = await api.get(`/users/me/transactions`, params);
+    const res = await api.get(`/users/me/transactions`, {params});
     return res.data;
 }
 

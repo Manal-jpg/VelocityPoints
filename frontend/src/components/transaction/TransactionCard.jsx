@@ -19,6 +19,7 @@ export function TransactionCard({
                                     processed,
                                     onClick
                                 }) {
+
     const renderIcon = (type) => {
         if (type === "purchase") return <ShoppingCart size={16} />;
         if (type === "transfer") return <ArrowRightLeft size={16} />;

@@ -1,8 +1,51 @@
-import { X } from "lucide-react";
+import {X} from "lucide-react";
 import {CreateTransactionForm} from "./CreateTransactionForm";
 import {useState} from "react";
+import {createTransaction, createTransferTransaction, createRedemptionTransaction} from "../../api/transactions.js";
 
-export function CreateTransaction({ title, onClose, type}) {
+const createData = (formData) => {
+    if (formData.type === "purchase") {
+        return {
+            utorid: formData.utorid,
+            spent: parseFloat(formData.spent),
+            remark: formData.remark,
+            promotionIds: formData.promotionIds,
+            type: formData.type,
+        }
+
+    }
+
+    if (formData.type === "adjustment") {
+        return {
+            utorid: formData.utorid,
+            amount: parseFloat(formData.amount),
+            remark: formData.remark,
+            relatedId: formData.relatedId,
+            promotionIds: formData.promotionIds,
+            type: formData.type,
+        }
+    }
+
+    if (formData.type === "transfer") {
+        return {
+            receiverUserId: formData.receiverUserId,
+            amount: parseFloat(formData.amount),
+            remark: formData.remark,
+        }
+    }
+
+    if (formData.type === "redemption") {
+        return {
+            amount: parseFloat(formData.amount),
+            remark: formData.remark,
+        }
+    }
+
+}
+
+export function CreateTransaction({title, onClose, type, onSucess}) {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const [formData, setFormData] = useState({
 
         utorid: '',
@@ -10,11 +53,43 @@ export function CreateTransaction({ title, onClose, type}) {
         spent: '',
         remark: '',
         promotionIds: [],
-        relatedId: ''
+        relatedId: '',
+        type: type,
+        currentPromoId: '',
+        receiverUserId: ''
 
     });
-    return (
-        // Modal overlay
+
+    const handleSubmit = async () => {
+        setLoading(true);
+        setError('');
+        const requestBody = createData(formData);
+        try {
+            let result;
+            if (formData.type === "purchase" || formData.type === "adjustment") {
+                result = await createTransaction(requestBody)
+            }
+            if (formData.type === "transfer") {
+                result = await createTransferTransaction(requestBody, requestBody.receiverUserId)
+            }
+            if (formData.type === "redemption") {
+                result = await createRedemptionTransaction(requestBody)
+            }
+            console.log("Transaction created", result)
+            onClose();
+            onSucess()
+
+        } catch (error) {
+            setError(error.message || "Failed to Create Transaction");
+            console.error(error)
+        } finally {
+            setLoading(false);
+        }
+
+
+    }
+
+    return (// Modal overlay
         <div
             className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
             onClick={onClose}
@@ -32,25 +107,39 @@ export function CreateTransaction({ title, onClose, type}) {
                             onClick={onClose}
                             className="text-white/90 hover:text-white hover:bg-white/20 rounded-lg p-1 transition"
                         >
-                            <X size={24} />
+                            <X size={24}/>
                         </button>
                     </div>
                 </div>
 
                 {/* Form Content */}
-                <CreateTransactionForm type={type} setFormData={setFormData} formData={formData} />
+                <CreateTransactionForm type={type} setFormData={setFormData} formData={formData}
+                                       onSubmit={handleSubmit}/>
 
 
                 {/* Close Button */}
                 <div className="px-6 pb-6">
                     <button
-                        onClick={onClose}
+                        type="submit"
+                        form={"transaction-form"}
+                        disabled={loading}
                         className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition"
                     >
-                        Close
+                        {loading ? "Creating..." : "Submit"}
                     </button>
+
                 </div>
+
+                {/* Show error */}
+                {error && (
+                    // Outer container: Full width (implicit), uses consistent padding (p-4)
+                    <div className="p-4">
+                        {/* Inner block: Full width, background, styling, text-centered */}
+                        <p className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-red-600 font-medium rounded-lg transition text-center">
+                            {error}
+                        </p>
+                    </div>
+                )}
             </div>
-        </div>
-    );
+        </div>);
 }
