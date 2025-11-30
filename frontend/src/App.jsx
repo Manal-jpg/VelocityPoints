@@ -112,6 +112,15 @@ export default function App() {
       />
 
       <Route
+        path="/events/:id"
+        element={
+          <ProtectedRoute>
+            <EventDetails />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/manager/events/new"
         element={
           <ProtectedRoute>

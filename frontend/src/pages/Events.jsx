@@ -56,8 +56,8 @@ export default function Events() {
       console.error("Failed to fetch events:", err);
       setError(
         err?.response?.data?.error ||
-        err?.response?.data?.message ||
-        "Unable to load events."
+          err?.response?.data?.message ||
+          "Unable to load events."
       );
     } finally {
       setLoading(false);
@@ -67,7 +67,14 @@ export default function Events() {
   // Reload when filters/pagination change
   useEffect(() => {
     loadEvents();
-  }, [page, nameFilter, locationFilter, timeFilter, publishedFilter, isManagerPlus]);
+  }, [
+    page,
+    nameFilter,
+    locationFilter,
+    timeFilter,
+    publishedFilter,
+    isManagerPlus,
+  ]);
 
   // Reload when navigating back
   useEffect(() => {
@@ -79,7 +86,6 @@ export default function Events() {
   return (
     <AppLayout title="Events">
       <div className="p-6">
-        
         {/* HEADER */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Events</h2>
@@ -168,8 +174,8 @@ export default function Events() {
                       event.pointsAwarded ??
                       event.points ??
                       0,
-                    rsvps: event._count?.guests ?? 0,   // ⭐ FIXED HERE
-                    rsvped: false,
+                    rsvps: event.numGuests ?? event._count?.guests ?? 0,
+                    rsvped: event.rsvped ?? false,
                     date: start.toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",

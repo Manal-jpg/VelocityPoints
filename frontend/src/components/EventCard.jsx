@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export function EventCard({ event }) {
   return (
-    <Link to={`/manager/events/${event.id}`} className="block">
+    <Link to={`/events/${event.id}`} className="block">
       <div
         className="bg-white rounded-2xl overflow-hidden hover:-translate-y-1 transition-all w-full max-w-[350px] mx-auto cursor-pointer"
         style={{
