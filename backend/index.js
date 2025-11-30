@@ -1840,6 +1840,7 @@ app.post("/events", need("manager", "superuser"), async (req, res) => {
     return res.status(400).json({ error: "Bad Request" });
   }
 });
+
 //
 // GET /events - list events (regular+ with filters). Manager+ gets published filter option
 //
