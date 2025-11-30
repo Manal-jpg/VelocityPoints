@@ -35,71 +35,83 @@ export default function PromotionViewPage() {
   if (loading)
     return (
       <AppLayout title="Promotion Details">
-        <div className="p-4">Loading…</div>
+        <div className="p-6 text-sm text-slate-600">Loading…</div>
       </AppLayout>
     );
 
   if (error)
     return (
       <AppLayout title="Promotion Details">
-        <div className="p-4 text-red-600 text-sm">{error}</div>
+        <div className="p-6 text-red-600 text-sm">{error}</div>
       </AppLayout>
     );
 
   if (!promo)
     return (
       <AppLayout title="Promotion Details">
-        <div className="p-4 text-sm">Promotion not found.</div>
+        <div className="p-6 text-sm text-slate-700">Promotion not found.</div>
       </AppLayout>
     );
 
   const start = new Date(promo.startTime);
   const end = new Date(promo.endTime);
 
+  const typeLabel = promo.type === "automatic" ? "Automatic" : "One-time";
+  const accentClass =
+    promo.type === "automatic"
+      ? "from-emerald-500 to-emerald-400 border-emerald-200 text-emerald-800"
+      : "from-indigo-500 to-indigo-400 border-indigo-200 text-indigo-800";
+
   return (
     <AppLayout title="Promotion Details">
-      <div className="p-4 space-y-6 bg-white border rounded-xl max-w-2xl shadow-sm">
-
-        <h1 className="text-2xl font-semibold">{promo.name}</h1>
-
-        <p className="text-gray-700">{promo.description}</p>
-
-        <div className="text-sm space-y-2">
-          <div>
-            <span className="font-medium">Type:</span>{" "}
-            {promo.type === "automatic" ? "Automatic" : "One-time"}
+      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-wide text-emerald-600 font-semibold">
+              Promotion
+            </p>
+            <h1 className="text-3xl font-bold text-slate-900">{promo.name}</h1>
+            <p className="text-sm text-slate-600">{promo.description}</p>
           </div>
+          <span
+            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border bg-white ${accentClass}`}
+          >
+            {typeLabel}
+          </span>
+        </div>
 
-          {promo.minSpending != null && (
-            <div>
-              <span className="font-medium">Min Spending:</span> ${promo.minSpending}
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-700">
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+              <p className="text-xs text-slate-500">Starts</p>
+              <p className="font-semibold text-slate-900">{start.toLocaleString()}</p>
             </div>
-          )}
-
-          {promo.rate != null && (
-            <div>
-              <span className="font-medium">Rate:</span> {promo.rate}
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+              <p className="text-xs text-slate-500">Ends</p>
+              <p className="font-semibold text-slate-900">{end.toLocaleString()}</p>
             </div>
-          )}
-
-          {promo.points != null && (
-            <div>
-              <span className="font-medium">Points:</span> {promo.points}
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+              <p className="text-xs text-slate-500">Min spending</p>
+              <p className="font-semibold text-slate-900">
+                {promo.minSpending != null ? `$${promo.minSpending}` : "—"}
+              </p>
             </div>
-          )}
-
-          <div>
-            <span className="font-medium">Valid:</span>{" "}
-            {start.toLocaleString()} – {end.toLocaleString()}
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+              <p className="text-xs text-slate-500">Rate</p>
+              <p className="font-semibold text-slate-900">{promo.rate ?? "—"}</p>
+            </div>
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+              <p className="text-xs text-slate-500">Points</p>
+              <p className="font-semibold text-slate-900">{promo.points ?? "—"}</p>
+            </div>
           </div>
         </div>
 
-        {/* ⭐ Back button (under content) */}
-        <div className="pt-4">
+        <div className="flex justify-end">
           <button
             type="button"
             onClick={() => navigate("/promotions")}
-            className="px-4 py-1.5 border rounded-lg text-sm bg-gray-100 hover:bg-gray-200"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 shadow-sm hover:bg-slate-50"
           >
             ← Back to Promotions
           </button>

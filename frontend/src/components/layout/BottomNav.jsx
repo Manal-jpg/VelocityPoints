@@ -4,8 +4,8 @@ import { useAuth } from "../../hooks/useAuth";
 
 export function BottomNav() {
   const location = useLocation();
-  const { user } = useAuth();
-  const navItems = getNavItems(user);
+  const { user, activeRole } = useAuth();
+  const navItems = getNavItems(user, activeRole);
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-[#f4f4f5] z-20 overflow-x-auto no-scrollbar">
