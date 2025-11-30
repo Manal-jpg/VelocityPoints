@@ -28,14 +28,36 @@ const normalizeRoles = (user) => {
   return roles;
 };
 
-export const getNavItems = (user) => {
-  const roles = normalizeRoles(user);
-  const hasRole = (role) => roles.has(role.toUpperCase());
+export const getNavItems = (user, activeRole) => {
+  const baseRoles = normalizeRoles(user);
+  const derivedRoles = new Set(baseRoles);
+  if (baseRoles.has("SUPERUSER")) {
+    derivedRoles.add("MANAGER");
+    derivedRoles.add("CASHIER");
+    derivedRoles.add("REGULAR");
+  }
+  if (baseRoles.has("MANAGER")) {
+    derivedRoles.add("CASHIER");
+    derivedRoles.add("REGULAR");
+  }
+  if (baseRoles.has("CASHIER")) {
+    derivedRoles.add("REGULAR");
+  }
+  if (!derivedRoles.size) derivedRoles.add("REGULAR");
 
-  const isSuperuser = hasRole("superuser");
-  const isManager = hasRole("manager") || isSuperuser;
-  const isCashier = hasRole("cashier") || isManager;
-  const isRegular = hasRole("regular") && !isCashier && !isManager;
+  const chosen = (() => {
+    const lower = (activeRole || "").toUpperCase();
+    if (derivedRoles.has(lower)) return lower;
+    if (derivedRoles.has("SUPERUSER")) return "SUPERUSER";
+    if (derivedRoles.has("MANAGER")) return "MANAGER";
+    if (derivedRoles.has("CASHIER")) return "CASHIER";
+    return "REGULAR";
+  })();
+
+  const isSuperuser = chosen === "SUPERUSER";
+  const isManager = chosen === "MANAGER" || isSuperuser;
+  const isCashier = chosen === "CASHIER" || isManager;
+  const isRegular = chosen === "REGULAR" && !isCashier && !isManager;
 
   const items = [];
 
@@ -51,7 +73,11 @@ export const getNavItems = (user) => {
     add({ icon: QrCode, label: "My QR Code", path: "/qr" });
     add({ icon: Send, label: "Transfer Points", path: "/transfer" });
     add({ icon: Gift, label: "Redeem Points", path: "/redemptions/request" });
-    add({ icon: ClipboardCheck, label: "Redemption QR", path: "/redemptions/pending" });
+    add({
+      icon: ClipboardCheck,
+      label: "Redemption QR",
+      path: "/redemptions/pending",
+    });
     add({ icon: Tag, label: "Promotions", path: "/promotions" });
     add({ icon: CalendarRange, label: "Events", path: "/events" });
     add({ icon: Receipt, label: "My Transactions", path: "/transactions" });
@@ -59,18 +85,34 @@ export const getNavItems = (user) => {
 
   // Cashier navigation
   if (isCashier) {
-    add({ icon: PlusCircle, label: "New Transaction", path: "/cashier/transactions/new" });
-    add({ icon: ClipboardCheck, label: "Process Redemption", path: "/cashier/redemptions/process" });
+    add({
+      icon: PlusCircle,
+      label: "New Transaction",
+      path: "/cashier/transactions/new",
+    });
+    add({
+      icon: ClipboardCheck,
+      label: "Process Redemption",
+      path: "/cashier/redemptions/process",
+    });
     add({ icon: CalendarRange, label: "Events", path: "/events" });
   }
 
   // Manager navigation
   if (isManager) {
     add({ icon: Users, label: "Users", path: "/manager/users" });
-    add({ icon: Receipt, label: "All Transactions", path: "/manager/transactions" });
+    add({
+      icon: Receipt,
+      label: "All Transactions",
+      path: "/manager/transactions",
+    });
     add({ icon: Tag, label: "Promotions", path: "/manager/promotions" });
     add({ icon: CalendarRange, label: "Events", path: "/events" });
-    add({ icon: PlusCircle, label: "Create Event", path: "/manager/events/new" });
+    add({
+      icon: PlusCircle,
+      label: "Create Event",
+      path: "/manager/events/new",
+    });
   }
 
   // Universal
