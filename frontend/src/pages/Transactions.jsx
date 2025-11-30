@@ -27,25 +27,7 @@ export default function Transactions() {
     const [showCreateTransfer, setShowCreateTransfer] = useState(false);
     const [showCreatePurchase, setShowCreatePurchase] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
-    const [transactions, setTransactions] = useState([{
-        "id": 2,
-        "type": "redemption",
-        "amount": -500,
-        "redeemed": 500,
-        "utorid": "johndoe1",
-        "processed": false,
-        "processedById": null,
-        "remark": "Gift card",
-        "createdBy": "johndoe1",
-        "createdAt": "2025-11-12T16:15:00Z",
-        "promotionIds": [1, 2, 3]
-    }
-
-
-    ])
-
-
-
+    const [transactions, setTransactions] = useState([])
 
 
     const [showFilters, setShowFilters] = useState(false);
@@ -88,7 +70,7 @@ export default function Transactions() {
     const refreshTransactions = async () => {
         const reqParams = {...advancedFilters, type: advancedFilters.type === "all" ? null : advancedFilters.type};
         const newTransactions = await getAllTransactions(reqParams);
-        setTransactions(newTransactions);
+        setTransactions(newTransactions.results || []);
     }
 
     useEffect(() => {
@@ -98,7 +80,7 @@ export default function Transactions() {
 
             try {
                 const data = await getAllTransactions({}); // Your API call
-                setTransactions(data.results || data); // Adjust based on your API response
+                setTransactions(data.results || []); // Adjust based on your API response
             } catch (err) {
                 setError(err.message);
                 console.error('Failed to fetch transactions:', err);
@@ -111,26 +93,21 @@ export default function Transactions() {
     }, []); // Empty array = run once on mount
 
 
-
     if (loading) {
-        return (
-            <AppLayout title="Transactions">
-                <div className="flex justify-center items-center h-64">
-                    <p className="text-slate-500">Loading transactions...</p>
-                </div>
-            </AppLayout>
-        );
+        return (<AppLayout title="Transactions">
+            <div className="flex justify-center items-center h-64">
+                <p className="text-slate-500">Loading transactions...</p>
+            </div>
+        </AppLayout>);
     }
 
     // Show error state
     if (error) {
-        return (
-            <AppLayout title="Transactions">
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <p className="text-red-600">{error}</p>
-                </div>
-            </AppLayout>
-        );
+        return (<AppLayout title="Transactions">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-600">{error}</p>
+            </div>
+        </AppLayout>);
     }
 
     return (
