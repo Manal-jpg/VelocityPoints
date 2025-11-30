@@ -28,22 +28,22 @@ const createData = (formData) => {
 
     if (formData.type === "transfer") {
         return {
-            receiverUserId: formData.receiverUserId,
+            receiverUserId: parseFloat(formData.receiverUserId),
             amount: parseFloat(formData.amount),
             remark: formData.remark,
+            type: formData.type,
         }
     }
 
     if (formData.type === "redemption") {
         return {
-            amount: parseFloat(formData.amount),
-            remark: formData.remark,
+            amount: parseFloat(formData.amount), remark: formData.remark, type: formData.type,
         }
     }
 
 }
 
-export function CreateTransaction({title, onClose, type, onSucess}) {
+export function CreateTransaction({title, onClose, type, onSuccess}) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [formData, setFormData] = useState({
@@ -71,13 +71,14 @@ export function CreateTransaction({title, onClose, type, onSucess}) {
             }
             if (formData.type === "transfer") {
                 result = await createTransferTransaction(requestBody, requestBody.receiverUserId)
+                console.log(result)
             }
             if (formData.type === "redemption") {
                 result = await createRedemptionTransaction(requestBody)
             }
             console.log("Transaction created", result)
             onClose();
-            onSucess()
+            await onSuccess()
 
         } catch (error) {
             setError(error.message || "Failed to Create Transaction");
@@ -131,15 +132,13 @@ export function CreateTransaction({title, onClose, type, onSucess}) {
                 </div>
 
                 {/* Show error */}
-                {error && (
-                    // Outer container: Full width (implicit), uses consistent padding (p-4)
+                {error && (// Outer container: Full width (implicit), uses consistent padding (p-4)
                     <div className="p-4">
                         {/* Inner block: Full width, background, styling, text-centered */}
                         <p className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-red-600 font-medium rounded-lg transition text-center">
                             {error}
                         </p>
-                    </div>
-                )}
+                    </div>)}
             </div>
         </div>);
 }

@@ -14,10 +14,6 @@ import {TransactionDetails} from "../components/transaction/TransactionDetails.j
 import {CreateTransaction} from "../components/transaction/CreateTransaction.jsx"
 import {getAllTransactions} from "../api/transactions.js";
 
-
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-
-
 export default function Transactions() {
     const {user} = useAuth();
     const [loading, setLoading] = useState(true);
@@ -139,27 +135,27 @@ export default function Transactions() {
 
             {showCreatePurchase && (<CreateTransaction title={"Create Purchase"}
                                                        onClose={() => setShowCreatePurchase(false)} type={"purchase"}
-                                                       onSucess={refreshTransactions}> </CreateTransaction>)
+                                                       onSuccess={refreshTransactions}> </CreateTransaction>)
 
             }
 
             {showCreateTransfer && (<CreateTransaction title={"Create Transfer"}
                                                        onClose={() => setShowCreateTransfer(false)} type={"transfer"}
-                                                       onSucess={refreshTransactions()}> </CreateTransaction>)
+                                                       onSuccess={refreshTransactions}> </CreateTransaction>)
 
             }
 
             {showCreateRedemption && (<CreateTransaction title={"Create Redemption"}
                                                          onClose={() => setShowCreateRedemption(false)}
                                                          type={"redemption"}
-                                                         onSucess={refreshTransactions()}> </CreateTransaction>)
+                                                         onSuccess={refreshTransactions}> </CreateTransaction>)
 
             }
 
             {showCreateAdjustment && (<CreateTransaction title={"Create Adjustment"}
                                                          onClose={() => setShowCreateAdjustment(false)}
                                                          type={"adjustment"}
-                                                         onSucess={refreshTransactions}> </CreateTransaction>)
+                                                         onSuccess={refreshTransactions}> </CreateTransaction>)
 
             }
 

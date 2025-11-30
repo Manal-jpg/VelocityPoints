@@ -8,25 +8,16 @@ import {
 } from "lucide-react";
 
 export function TransactionCard({
-                                    id,
-                                    title,
-                                    date,
-                                    time,
-                                    amount,
-                                    type,
-                                    borderColor,
-                                    suspicious,
-                                    processed,
-                                    onClick
+                                    id, title, amount, type, borderColor, suspicious, processed, onClick, transaction
                                 }) {
 
     const renderIcon = (type) => {
-        if (type === "purchase") return <ShoppingCart size={16} />;
-        if (type === "transfer") return <ArrowRightLeft size={16} />;
-        if (type === "event") return <Calendar size={16} />;
-        if (type === "redemption") return <Gift size={16} />;
-        if (type === "adjustment") return <Settings size={16} />;
-        return <ShoppingCart size={16} />
+        if (type === "purchase") return <ShoppingCart size={16}/>;
+        if (type === "transfer") return <ArrowRightLeft size={16}/>;
+        if (type === "event") return <Calendar size={16}/>;
+        if (type === "redemption") return <Gift size={16}/>;
+        if (type === "adjustment") return <Settings size={16}/>;
+        return <ShoppingCart size={16}/>
     }
 
     return (<div onClick={onClick}
@@ -48,26 +39,35 @@ export function TransactionCard({
                     <h4 className="text-base font-semibold text-slate-900">
                         {title}
                     </h4>
-                    {suspicious && (
-                        <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-600 border border-red-200 rounded-full text-xs font-semibold">
+                    {suspicious && (<span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-600 border border-red-200 rounded-full text-xs font-semibold">
       <AlertTriangle size={11}/>
       SUSPICIOUS
-    </span>
-                    )}
-                    {processed === false && (
-                        <span
-                            className="px-2 py-0.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-semibold">
+    </span>)}
+                    {processed === false && (<span
+                        className="px-2 py-0.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-semibold">
       PENDING
-    </span>
-                    )}
+    </span>)}
 
                 </div>
                 {/* Date/time will go here */}
                 <p className={"text-sm  text-slate-500 mb-1"}>
-                    {date} at {time}
+                    {["redemption", "purchase", "adjustment"].includes(type) && `Customer: ${transaction.utorid}`}
                 </p>
-                {/* Transaction ID will go here */}
+                {type === "transfer" && (<div>
+                    <p className={"text-sm  text-slate-500 mb-1"}>
+                        {`Sender: ${transaction.sender}`}
+                    </p>
+                    <p className={"text-sm  text-slate-500 mb-1"}>
+                        {`Recipient: ${transaction.recipient}`}
+
+                    </p>
+
+
+                </div>)}
+
+
+                {/*Transaction ID will go here*/}
                 <p className={"text-sm text-slate-500 mb-1"}>
                     Transaction ID: {id}
                 </p>

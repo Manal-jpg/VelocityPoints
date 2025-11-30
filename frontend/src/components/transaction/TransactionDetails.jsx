@@ -81,7 +81,7 @@ export function TransactionDetails({transaction, onClose}) {
                         <span className="text-4xl">{renderIcon(transaction.type)}</span>
                         <div className="flex-1">
                             <h2 className="text-2xl font-bold">{getTransactionTitle(transaction.type)}</h2>
-                            <p className="text-white/80 text-sm">transaction #{transaction.id}</p>
+                            <p className="text-white/80 text-sm">Transaction #{transaction.id}</p>
                         </div>
                         <button
                             onClick={onClose}
@@ -116,16 +116,16 @@ export function TransactionDetails({transaction, onClose}) {
                             </div>
                         </div>
 
-                        {/* Created At */}
-                        <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
-                            <Clock size={20} className="text-slate-400 mt-0.5" />
-                            <div>
-                                <p className="text-xs text-slate-500 mb-1">Created At</p>
-                                <p className="text-base text-slate-900">
-                                    {formatDate(transaction.createdAt)} {formatTime(transaction.createdAt)}
-                                </p>
-                            </div>
-                        </div>
+                        {/*/!* Created At *!/*/}
+                        {/*<div className="flex gap-3 border border-slate-100 rounded-lg p-3">*/}
+                        {/*    <Clock size={20} className="text-slate-400 mt-0.5" />*/}
+                        {/*    <div>*/}
+                        {/*        <p className="text-xs text-slate-500 mb-1">Created At</p>*/}
+                        {/*        <p className="text-base text-slate-900">*/}
+                        {/*            {formatDate(transaction.createdAt)} {formatTime(transaction.createdAt)}*/}
+                        {/*        </p>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
 
                         {/* Amount Spent */}
                         <div className="flex gap-3 border border-slate-100 rounded-lg p-3">

@@ -33,7 +33,7 @@ export async function toggleTransactionSuspicious(payload) {
 export async function createTransferTransaction(payload, userId) {
     // payload = amount, type
     // userId is id of the user we are sending to
-    const res = await api.post(`/users${userId}/transactions`, payload);
+    const res = await api.post(`/users/${userId}/transactions`, payload);
     return res.data;
 }
 

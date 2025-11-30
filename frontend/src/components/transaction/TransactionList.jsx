@@ -37,7 +37,7 @@ export function TransactionList({filteredTransactions, setSelectedTransaction}) 
             <div>
                 <div className={"flex items-center justify-between mb-4"}>
                     <h3 className={"text-lg font-semibold text-slate-900"}>
-                        Showing {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? "s" : ""}
+                        Showing {filteredTransactions.length} Transaction{filteredTransactions.length !== 1 ? "s" : ""}
                     </h3>
                     <div className={"flex items-center gap-2 text-sm text-slate-500"}>
                         <span> Nov 2025</span>
@@ -59,6 +59,7 @@ export function TransactionList({filteredTransactions, setSelectedTransaction}) 
                         borderColor={getBorderColor(t.type)}
                         suspicious={t.suspicious}
                         processed={t.processed}
+                        transaction={t}
                         onClick={() => setSelectedTransaction(t)}
                     />
                 ))}

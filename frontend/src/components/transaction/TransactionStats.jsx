@@ -1,9 +1,9 @@
 
-export function TransactionStats({transactions, userPoints}) {
+export function TransactionStats({transactions}) {
     const totalTransactions = transactions.length;
-    const pointsEarned = transactions.length;
-    const pointsSpent = transactions.length;
-    const netEarned = pointsEarned - pointsSpent;
+    const pointsEarned = transactions.reduce((acc, t) => t.amount > 0 ? acc + t.amount : acc, 0);
+    const pointsSpent = transactions.reduce((acc, t) => t.amount < 0 ? acc + t.amount : acc, 0);
+    const netEarned = pointsEarned + pointsSpent;
 
     return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 py-7">
