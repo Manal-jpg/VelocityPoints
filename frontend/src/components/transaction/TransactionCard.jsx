@@ -1,11 +1,4 @@
-import {ChevronRight, AlertTriangle} from "lucide-react";
-import {
-    ShoppingCart,    // Purchase
-    Gift,            // Redemption
-    ArrowRightLeft,  // Transfer
-    Settings,        // Adjustment
-    Calendar,        // Event
-} from "lucide-react";
+import {AlertTriangle, ArrowRightLeft, Calendar, ChevronRight, Gift, Settings, ShoppingCart} from "lucide-react";
 
 export function TransactionCard({
                                     id, title, amount, type, borderColor, suspicious, processed, onClick, transaction
@@ -56,10 +49,10 @@ export function TransactionCard({
                 </p>
                 {type === "transfer" && (<div>
                     <p className={"text-sm  text-slate-500 mb-1"}>
-                        {`Sender: ${transaction.sender}`}
+                        {`Sender: ${transaction.utorid}`}
                     </p>
                     <p className={"text-sm  text-slate-500 mb-1"}>
-                        {`Recipient: ${transaction.recipient}`}
+                        {`Recipient User ID: ${transaction.relatedId}`}
 
                     </p>
 

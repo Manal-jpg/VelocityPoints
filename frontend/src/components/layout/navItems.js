@@ -76,7 +76,7 @@ export const getNavItems = (user) => {
     add({
       icon: Receipt,
       label: "All Transactions",
-      path: "/manager/transactions",
+      path: "/transactions",
     });
     add({ icon: Tag, label: "Promotions", path: "/manager/promotions" });
     add({ icon: CalendarRange, label: "Events", path: "/manager/events" });

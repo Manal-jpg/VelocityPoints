@@ -40,26 +40,30 @@ export function TransactionFilters({
                 </button>))}
 
                 {/* Transaction ID Search */}
-                <div className="flex items-center gap-2">
-                    <input type={"number"} placeholder={"Find by ID"}
-                           value={transactionId}
-                           onChange={(e) => {
-                               setTransactionId(e.target.value);
-                           }}
-                           className="w-40 px-3 py-2 border border-slate-200 rounded-lg text-sm
+                {hasPermissions["manager", "superuser"] && (
+                    <div className="flex items-center gap-2">
+                        <input type={"number"} placeholder={"Find by ID"}
+                               value={transactionId}
+                               onChange={(e) => {
+                                   setTransactionId(e.target.value);
+                               }}
+                               className="w-40 px-3 py-2 border border-slate-200 rounded-lg text-sm
                             focus:outline-none focus:ring-2 focus:ring-emerald-500"/>
 
-                    {!isNaN(transactionId) && (
-                        <button onClick={() => setTransactionId('')} className="text-slate-400 hover:text-slate-600"
-                        >
-                            <X size={16}/>
+                        {!isNaN(transactionId) && (
+                            <button onClick={() => setTransactionId('')} className="text-slate-400 hover:text-slate-600"
+                            >
+                                <X size={16}/>
 
-                        </button>
+                            </button>
 
 
-                    )}
+                        )}
 
-                </div>
+                    </div>
+
+                )}
+
 
             </div>
 
@@ -110,38 +114,48 @@ export function TransactionFilters({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
                     {/* Name/UTORid Search */}
-                    <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">
-                            Search by Name/UTORid
-                        </label>
-                        <input
-                            type="text"
-                            value={advancedFilters.name}
-                            placeholder="Search..."
-                            onChange={(e) => setAdvancedFilters({
-                                ...advancedFilters, name: e.target.value
-                            })}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm
+                    {hasPermissions["manager", "superuser"] && (
+
+                        <div>
+                            <label className="block text-sm text-slate-600 mb-1.5">
+                                Search by Name/UTORid
+                            </label>
+                            <input
+                                type="text"
+                                value={advancedFilters.name}
+                                placeholder="Search..."
+                                onChange={(e) => setAdvancedFilters({
+                                    ...advancedFilters, name: e.target.value
+                                })}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm
   focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        />
-                    </div>
+                            />
+                        </div>
+
+
+                    )}
+
 
                     {/* Created By */}
-                    <div>
-                        <label className="block text-sm text-slate-600 mb-1.5">
-                            Created By (UTORid)
-                        </label>
-                        <input
-                            type="text"
-                            value={advancedFilters.createdBy}
-                            placeholder="Creator's UTORid"
-                            onChange={(e) => setAdvancedFilters({
-                                ...advancedFilters, createdBy: e.target.value
-                            })}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm
+                    {hasPermissions["manager", "superuser"] && (
+                        <div>
+                            <label className="block text-sm text-slate-600 mb-1.5">
+                                Created By (UTORid)
+                            </label>
+                            <input
+                                type="text"
+                                value={advancedFilters.createdBy}
+                                placeholder="Creator's UTORid"
+                                onChange={(e) => setAdvancedFilters({
+                                    ...advancedFilters, createdBy: e.target.value
+                                })}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm
   focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        />
-                    </div>
+                            />
+                        </div>
+
+                    )}
+
 
                     {/* Suspicious (Managers only) */}
                     {hasPermissions(["manager", "superuser"]) && (<div>

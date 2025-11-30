@@ -9,7 +9,7 @@ import {Pagination} from "../components/transaction/Pagination.jsx";
 import {TransactionList} from "../components/transaction/TransactionList.jsx";
 import {TransactionDetails} from "../components/transaction/TransactionDetails.jsx";
 import {CreateTransaction} from "../components/transaction/CreateTransaction.jsx"
-import {getAllTransactions} from "../api/transactions.js";
+import {getAllTransactions, getUserTransactions} from "../api/transactions.js";
 
 export default function Transactions() {
     const {user} = useAuth();
@@ -95,8 +95,13 @@ export default function Transactions() {
     console.log(filteredTransactions)
 
     const refreshTransactions = async () => {
-        const reqParams = {...advancedFilters, type: advancedFilters.type === "all" ? null : advancedFilters.type};
-        const newTransactions = await getAllTransactions(reqParams);
+        const reqParams = {...advancedFilters, type: advancedFilters.type === "all" ? null :
+                advancedFilters.type};
+
+        const newTransactions = hasPermissions(['manager', 'superuser'])
+            ? await getAllTransactions(reqParams)
+            : await getUserTransactions(reqParams);
+
         setTransactions(newTransactions.results || []);
     }
 
@@ -106,7 +111,17 @@ export default function Transactions() {
             setError('');
 
             try {
-                const data = await getAllTransactions({params: {page: currentPage, limit: limit}}); // Your API call
+                const params = {
+                    page: currentPage,
+                    limit: limit,
+                    // ... all your filters
+                };
+
+                // Switch endpoint based on role
+                const data = hasPermissions(['manager', 'superuser'])
+                    ? await getAllTransactions(params)      // Managers see ALL
+                    : await getUserTransactions(params);     // Regular users see ONLY theirs
+
                 setTransactions(data.results || []); // Adjust based on your API response
                 setTotalCount(data.count || 0);
             } catch (err) {
@@ -119,6 +134,51 @@ export default function Transactions() {
 
         fetchTransactions();
     }, [currentPage, limit]); // Empty array = run once on mount
+
+    // useEffect(() => {
+    //     const fetchTransactions = async () => {
+    //         setLoading(true);
+    //         setError('');
+    //
+    //         try {
+    //             // Build query params from filters
+    //             const params = {
+    //                 page: currentPage,
+    //                 limit: limit,
+    //
+    //                 // Only include active filters
+    //                 ...(advancedFilters.type !== "all" && {type: advancedFilters.type}),
+    //                 ...(advancedFilters.name && {name: advancedFilters.name}),
+    //                 ...(advancedFilters.createdBy && {createdBy: advancedFilters.createdBy}),
+    //                 ...(advancedFilters.suspicious !== "" && {
+    //                     suspicious: advancedFilters.suspicious
+    //                 }),
+    //                 ...(advancedFilters.promotionId && {
+    //                     promotionId:
+    //                         parseInt(advancedFilters.promotionId)
+    //                 }),
+    //                 ...(advancedFilters.relatedId && {
+    //                     relatedId: parseInt(advancedFilters.relatedId)
+    //                 }),
+    //                 ...(advancedFilters.operator && advancedFilters.amount && {
+    //                     amount: parseInt(advancedFilters.amount),
+    //                     operator: advancedFilters.operator
+    //                 }),
+    //                 ...(transactionId !== '' && {transactionId: parseInt(transactionId)})
+    //             };
+    //
+    //             const data = await getAllTransactions(params);
+    //             setTransactions(data.results || []);
+    //             setTotalCount(data.count || 0);
+    //         } catch (err) {
+    //             setError(err.message);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+    //
+    //     fetchTransactions();
+    // }, [currentPage, limit, advancedFilters, transactionId]); // Re-fetch when filters change
 
 
     if (loading) {
@@ -148,7 +208,7 @@ export default function Transactions() {
 
 
             {/*{transaction stats}*/}
-            {hasPermissions(['regular']) && (<TransactionStats transactions={transactions}/>
+            {hasPermissions(['regular', "cashier"]) && (<TransactionStats transactions={transactions} user={user}/>
 
             )}
 

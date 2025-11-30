@@ -92,10 +92,10 @@ export function TransactionDetails({transaction, onClose, hasPermissions, onRefr
     }
 
     const processRedemption = async () => {
-        const payload = {processed: processed};
+        const payload = {processed: true};
         const transactionId = transaction.id;
         try {
-            const res = processRedemptionTransaction(payload, transactionId);
+            const res = await processRedemptionTransaction(payload, transactionId);
             console.log(res);
             setProcessed(true)
             onRefresh();
@@ -279,6 +279,7 @@ export function TransactionDetails({transaction, onClose, hasPermissions, onRefr
                         </div>
 
                         {/* Promotions Applied */}
+
                         <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
                             <Tag size={20} className="text-slate-400 mt-0.5"/>
                             <div>
@@ -288,6 +289,18 @@ export function TransactionDetails({transaction, onClose, hasPermissions, onRefr
                                 </p>
                             </div>
                         </div>
+
+
+                        {transaction.processed && transaction.processedBy?.utorid && (
+                            <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
+                                <User size={20} className="text-slate-400 mt-0.5"/>
+                                <div>
+                                    <p className="text-xs text-slate-500 mb-1">Processed By</p>
+                                    <p className="text-base text-slate-900">{transaction.processedBy.utorid}</p>
+                                </div>
+                            </div>
+
+                        )}
 
 
                     </div>

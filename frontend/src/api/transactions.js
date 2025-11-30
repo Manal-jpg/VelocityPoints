@@ -9,7 +9,7 @@ export async function createTransaction(payload) {
 }
 
 // get transactions
-export async function getAllTransactions({params = {}}) {
+export async function getAllTransactions(params) {
     const res = await api.get("/transactions", {params});
     // returns {count: , results []}
     return res.data;
