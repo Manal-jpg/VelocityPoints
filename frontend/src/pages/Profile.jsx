@@ -9,7 +9,8 @@ import {
   User,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { QRCodeCanvas } from "qrcode.react";
 import { AppLayout } from "../components/layout/Layout";
 import { useAuth } from "../hooks/useAuth";
 
@@ -131,61 +132,29 @@ export default function Profile() {
           <h3 className="text-[#18181b] text-center mb-6">Your QR Code</h3>
 
           <div
-            className="bg-white p-6 rounded-2xl border-2 border-dashed border-[#00a862] mb-5"
+            className="bg-white p-6 rounded-2xl border-2 border-dashed border-[#00a862] mb-5 flex justify-center"
             style={{
               boxShadow:
                 "0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
             }}
           >
-            <div className="w-[200px] h-[200px] mx-auto bg-white">
-              <svg viewBox="0 0 200 200" className="w-full h-full">
-                <rect width="200" height="200" fill="white" />
-                <g fill="black">
-                  <rect x="10" y="10" width="60" height="60" />
-                  <rect x="20" y="20" width="40" height="40" fill="white" />
-                  <rect x="30" y="30" width="20" height="20" />
-
-                  <rect x="130" y="10" width="60" height="60" />
-                  <rect x="140" y="20" width="40" height="40" fill="white" />
-                  <rect x="150" y="30" width="20" height="20" />
-
-                  <rect x="10" y="130" width="60" height="60" />
-                  <rect x="20" y="140" width="40" height="40" fill="white" />
-                  <rect x="30" y="150" width="20" height="20" />
-
-                  <rect x="90" y="30" width="10" height="10" />
-                  <rect x="110" y="30" width="10" height="10" />
-                  <rect x="100" y="50" width="10" height="10" />
-                  <rect x="90" y="70" width="10" height="10" />
-                  <rect x="110" y="70" width="10" height="10" />
-
-                  <rect x="30" y="90" width="10" height="10" />
-                  <rect x="50" y="90" width="10" height="10" />
-                  <rect x="70" y="90" width="10" height="10" />
-                  <rect x="90" y="90" width="10" height="10" />
-                  <rect x="110" y="90" width="10" height="10" />
-                  <rect x="130" y="90" width="10" height="10" />
-                  <rect x="150" y="90" width="10" height="10" />
-                  <rect x="170" y="90" width="10" height="10" />
-
-                  <rect x="90" y="110" width="10" height="10" />
-                  <rect x="110" y="110" width="10" height="10" />
-                  <rect x="130" y="110" width="10" height="10" />
-                  <rect x="150" y="110" width="10" height="10" />
-                  <rect x="170" y="110" width="10" height="10" />
-
-                  <rect x="90" y="130" width="10" height="10" />
-                  <rect x="110" y="150" width="10" height="10" />
-                  <rect x="130" y="130" width="10" height="10" />
-                  <rect x="150" y="150" width="10" height="10" />
-                  <rect x="170" y="170" width="10" height="10" />
-                </g>
-              </svg>
-            </div>
+            {user?.utorid ? (
+              <QRCodeCanvas
+                value={`${window.location.origin}/scan/user?utorid=${encodeURIComponent(
+                  user.utorid
+                )}`}
+                size={200}
+                bgColor="#ffffff"
+                fgColor="#111827"
+                includeMargin
+              />
+            ) : (
+              <p className="text-sm text-slate-600">No user info available.</p>
+            )}
           </div>
 
-          <p className="text-center text-[13px] text-[#71717a] mb-5">
-            Show this to cashiers to earn points
+          <p className="text-center text-[13px] text-[#71717a] mb-5 break-all">
+            Scan to view @{user?.utorid}
           </p>
 
           <button
@@ -196,9 +165,10 @@ export default function Profile() {
               boxShadow: "0 4px 6px rgba(0, 168, 98, 0.15)",
             }}
             type="button"
+            onClick={() => window.print()}
           >
             <Download size={18} strokeWidth={2} />
-            <span>Download QR Code</span>
+            <span>Download / Print QR</span>
           </button>
         </div>
 
