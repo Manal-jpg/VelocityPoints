@@ -7,7 +7,7 @@ import AccountInfo from "./pages/AccountInfo.jsx";
 import ChangePassword from "./pages/ChangePassword.jsx";
 import ManagerUsers from "./pages/ManagerUsers.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
-
+import Transactions from "./pages/Transactions.jsx";
 import { useAuth } from "./hooks/useAuth";
 
 // Events
@@ -22,6 +22,9 @@ import PromotionsManagerListPage from "./pages/PromotionsManagerListPage.jsx";
 import PromotionCreatePage from "./pages/PromotionCreatePage.jsx";
 import PromotionDetailPage from "./pages/PromotionDetailPage.jsx";
 import PromotionViewPage from "./pages/PromotionViewPage.jsx";
+import UserScanResult from "./pages/UserScanResult.jsx";
+import UserQrCode from "./pages/UserQrCode.jsx";
+import RedemptionQrCode from "./pages/RedemptionQrCode.jsx";
 
 // Route wrappers
 function PublicRoute({ children }) {
@@ -62,10 +65,34 @@ export default function App() {
         }
       />
       <Route path="/reset" element={<ResetPassword />} />
+      <Route
+        path="/qr"
+        element={
+          <ProtectedRoute>
+            <UserQrCode />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/redemptions/pending"
+        element={
+          <ProtectedRoute>
+            <RedemptionQrCode />
+          </ProtectedRoute>
+        }
+      />
 
       {/* PROTECTED ROUTES */}
       <Route path="/" element={<Navigate to="/events" replace />} />
 
+      <Route
+        path="/transactions"
+        element={
+          <ProtectedRoute>
+            <Transactions />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/profile"
         element={
@@ -157,6 +184,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/scan/user" element={<UserScanResult />} />
 
       {/* MANAGER PROMOTIONS */}
       <Route

@@ -125,5 +125,6 @@ export function AuthProvider({ children }) {
     switchInterface,
   };
 
+  // the value object is passed down to all the children
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
