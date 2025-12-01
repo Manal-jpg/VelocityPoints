@@ -40,7 +40,7 @@ export function TransactionFilters({
                 </button>))}
 
                 {/* Transaction ID Search */}
-                {hasPermissions["manager", "superuser"] && (
+                {hasPermissions(["manager", "superuser"]) && (
                     <div className="flex items-center gap-2">
                         <input type={"number"} placeholder={"Find by ID"}
                                value={transactionId}
@@ -114,7 +114,7 @@ export function TransactionFilters({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
                     {/* Name/UTORid Search */}
-                    {hasPermissions["manager", "superuser"] && (
+                    {hasPermissions(["manager", "superuser"]) && (
 
                         <div>
                             <label className="block text-sm text-slate-600 mb-1.5">
@@ -137,7 +137,7 @@ export function TransactionFilters({
 
 
                     {/* Created By */}
-                    {hasPermissions["manager", "superuser"] && (
+                    {hasPermissions(["manager", "superuser"]) && (
                         <div>
                             <label className="block text-sm text-slate-600 mb-1.5">
                                 Created By (UTORid)
