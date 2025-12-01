@@ -9,7 +9,7 @@ export function TransactionFilters({
                                        hasPermissions,
                                        setTransactionId,
                                        transactionId,
-                                       currentPage, setCurrentPage, limit, setLimit,
+                                       currentPage, setPage, limit, setLimit,
                                    }) {
 
     return (
@@ -261,7 +261,13 @@ export function TransactionFilters({
                         <input
                             type="number"
                             value={currentPage}
-                            onChange={(e) => setCurrentPage(parseInt(e.target.value, 10))}
+                            onChange={(e) => {
+                                const val = parseInt(e.target.value, 10);
+                                if (!isNaN(val) && val >= 1) {
+                                    setPage(val);
+                                }
+                            }}
+                            min="1"
                             className="w-full px-3 py-2 border border-slate-200 rounded-lg
   text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         />

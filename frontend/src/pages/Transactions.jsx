@@ -26,7 +26,7 @@ export default function Transactions() {
     // implementing pagination here
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
-    const [limit, setLimit] = useState(20);
+    const [limit, setLimit] = useState(10);
     const totalPages = Math.ceil(totalCount / limit);
 
 
@@ -39,9 +39,7 @@ export default function Transactions() {
         relatedId: "",
         amount: '',
         operator: "",
-        type: "all",
-        page: currentPage,
-        limit: limit
+        type: "all"
     });
 
     const quickFilters = [{value: "all", label: "All Transactions"}, {
