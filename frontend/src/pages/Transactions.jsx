@@ -167,7 +167,13 @@ export default function Transactions() {
             }
         };
 
-        fetchTransactions();
+        // Debounce: Wait 500ms after user stops typing before fetching
+        const timer = setTimeout(() => {
+            fetchTransactions();
+        }, 1000);
+
+        // Cancel previous timer if user keeps typing
+        return () => clearTimeout(timer);
     }, [currentPage, limit, advancedFilters, transactionId]); // Re-fetch when filters change
 
 
