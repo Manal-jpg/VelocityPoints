@@ -30,7 +30,7 @@ const getBorderColor = (type) => {
     return colors[type] || "#71717a"; // Default gray
 };
 
-export function TransactionList({filteredTransactions, setSelectedTransaction}) {
+export function TransactionList({filteredTransactions, setSelectedTransaction, hasPermissions, user}) {
     return (
         // {Transaction List Heading}
         <div>
@@ -61,6 +61,9 @@ export function TransactionList({filteredTransactions, setSelectedTransaction}) 
                         processed={t.processed}
                         transaction={t}
                         onClick={() => setSelectedTransaction(t)}
+                        hasPermissions={hasPermissions}
+                        user={user}
+
                     />
                 ))}
             </div>

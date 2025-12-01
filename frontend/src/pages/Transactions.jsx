@@ -95,14 +95,19 @@ export default function Transactions() {
     console.log(filteredTransactions)
 
     const refreshTransactions = async () => {
-        const reqParams = {...advancedFilters, type: advancedFilters.type === "all" ? null :
-                advancedFilters.type};
+        const reqParams = {
+            ...advancedFilters,
+            type: advancedFilters.type === "all" ? null : advancedFilters.type,
+            page: currentPage,
+            limit: limit
+        };
 
         const newTransactions = hasPermissions(['manager', 'superuser'])
             ? await getAllTransactions(reqParams)
             : await getUserTransactions(reqParams);
 
         setTransactions(newTransactions.results || []);
+        setTotalCount(newTransactions.count || 0);
     }
 
     useEffect(() => {
@@ -223,9 +228,7 @@ export default function Transactions() {
                                 page={currentPage} setPage={setCurrentPage} limit={limit} setLimit={setLimit}
             />
 
-            <TransactionList filteredTransactions={filteredTransactions} setSelectedTransaction={setSelectedTransaction}
-
-            />
+            <TransactionList filteredTransactions={filteredTransactions} setSelectedTransaction={setSelectedTransaction} hasPermissions={hasPermissions} user={user}/>
 
             {selectedTransaction && (
                 <TransactionDetails transaction={selectedTransaction} hasPermissions={hasPermissions}

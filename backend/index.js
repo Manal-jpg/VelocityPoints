@@ -300,6 +300,7 @@ app.get(
         include: {
           promotions: { include: { promotion: true } },
           createdBy: true,
+          relatedUser: true,
         },
         orderBy: { createdAt: "desc" },
       });
@@ -327,6 +328,7 @@ app.get(
           temp.relatedId = t.relatedTransactionId;
         } else if (t.type === "transfer") {
           temp.relatedId = t.relatedUserId;
+          temp.relatedUtorid = t.relatedUser?.utorid;
         } else if (t.type === "event") {
           temp.relatedId = t.eventId;
         }
@@ -1656,6 +1658,7 @@ app.get("/transactions", need("manager", "superuser"), async (req, res) => {
       include: {
         user: true,
         createdBy: true,
+        relatedUser: true,
         promotions: {
           include: { promotion: true },
         },
@@ -1690,6 +1693,7 @@ app.get("/transactions", need("manager", "superuser"), async (req, res) => {
         temp.relatedId = t.relatedTransactionId;
       } else if (t.type === "transfer") {
         temp.relatedId = t.relatedUserId;
+        temp.relatedUtorid = t.relatedUser?.utorid;
       } else if (t.type === "event") {
         temp.relatedId = t.eventId;
       }
