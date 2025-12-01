@@ -1,4 +1,4 @@
-import { Search, Bell, Settings, LogOut, User } from "lucide-react";
+import { Search, Bell, Settings, LogOut, User, Shuffle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -16,7 +16,7 @@ const getInitials = (name, utorid) => {
 };
 
 export function TopBar({ title, showSearch = true }) {
-  const { user, logout } = useAuth();
+  const { user, logout, activeRole, switchInterface } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
@@ -28,6 +28,30 @@ export function TopBar({ title, showSearch = true }) {
   const avatarUrl = user?.avatarUrl
     ? `${API_BASE_URL}${user.avatarUrl}`
     : null;
+
+  const availableRoles = useMemo(() => {
+    if (!user) return [];
+    const base = Array.isArray(user.roles)
+      ? user.roles
+      : user.role
+      ? [user.role]
+      : [];
+    const set = new Set(base.map((r) => String(r || "").toLowerCase()));
+    if (set.has("superuser")) {
+      set.add("manager");
+      set.add("cashier");
+      set.add("regular");
+    }
+    if (set.has("manager")) {
+      set.add("cashier");
+      set.add("regular");
+    }
+    if (set.has("cashier")) {
+      set.add("regular");
+    }
+    if (set.size === 0) set.add("regular");
+    return Array.from(set);
+  }, [user]);
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -43,6 +67,17 @@ export function TopBar({ title, showSearch = true }) {
     logout();
     setOpen(false);
     navigate("/login", { replace: true });
+  };
+
+  const formatRoleLabel = (role) => {
+    const map = {
+      regular: "User",
+      cashier: "Cashier",
+      manager: "Manager",
+      superuser: "Superuser",
+      organizer: "Organizer",
+    };
+    return map[role] || role;
   };
 
   return (
@@ -99,7 +134,41 @@ export function TopBar({ title, showSearch = true }) {
             )}
           </button>
           {open && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl border border-[#f4f4f5] shadow-lg overflow-hidden z-30">
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-[#f4f4f5] shadow-lg overflow-hidden z-30">
+              {availableRoles.length > 1 && (
+                <div className="border-b border-[#f4f4f5]">
+                  <div className="px-4 py-2 text-xs uppercase tracking-wide text-[#71717a] flex items-center gap-2">
+                    <Shuffle size={14} />
+                    Switch interface
+                  </div>
+                  {availableRoles.map((role) => {
+                    const isActive = role === activeRole;
+                    return (
+                      <button
+                        key={role}
+                        type="button"
+                        onClick={() => {
+                          switchInterface(role);
+                          setOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-2 px-4 py-2 text-sm ${
+                          isActive
+                            ? "bg-[#e6f7f0] text-[#0f9a61]"
+                            : "text-[#18181b] hover:bg-[#f9fafb]"
+                        }`}
+                      >
+                        <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[#0f9a61] opacity-60" />
+                        {formatRoleLabel(role)}
+                        {isActive && (
+                          <span className="ml-auto text-[11px] text-[#0f9a61]">
+                            Active
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => {

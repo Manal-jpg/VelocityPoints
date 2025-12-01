@@ -1846,6 +1846,7 @@ app.post("/events", need("manager", "superuser"), async (req, res) => {
     return res.status(400).json({ error: "Bad Request" });
   }
 });
+
 //
 // GET /events - list events (regular+ with filters). Manager+ gets published filter option
 //
@@ -1986,6 +1987,7 @@ app.get(
     }
 
     const numRsvped = ev.guests.reduce((acc, g) => acc + (g.rsvped ? 1 : 0), 0);
+    const isRsvped = ev.guests.some((g) => g.userId === currentUserId);
 
     if (!isManagerPlus && !isOrganizer) {
       return res.json({
@@ -2002,6 +2004,7 @@ app.get(
           name: o.user.name,
         })),
         numGuests: numRsvped,
+        rsvped: isRsvped,
       });
     }
 

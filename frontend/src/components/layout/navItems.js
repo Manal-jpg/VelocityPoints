@@ -2,7 +2,6 @@ import {
   CalendarRange,
   ClipboardCheck,
   Gift,
-  Home,
   PlusCircle,
   QrCode,
   Receipt,
@@ -14,35 +13,61 @@ import {
   Wallet,
 } from "lucide-react";
 
+/**
+ * Normalize user roles into a Set
+ */
 const normalizeRoles = (user) => {
-  // Roles may come as a single string or an array; normalize to a Set for easy lookups
   const roles = new Set();
   const raw = Array.isArray(user?.roles)
     ? user.roles
     : user?.role
     ? [user.role]
-    : ["regular"]; // default to basic user if role is missing
+    : ["regular"];
 
   raw.filter(Boolean).forEach((role) => roles.add(role.toUpperCase()));
   return roles;
 };
 
-export const getNavItems = (user) => {
-  const roles = normalizeRoles(user);
-  const hasRole = (role) => roles.has(role.toUpperCase());
+export const getNavItems = (user, activeRole) => {
+  const baseRoles = normalizeRoles(user);
+  const derivedRoles = new Set(baseRoles);
+  if (baseRoles.has("SUPERUSER")) {
+    derivedRoles.add("MANAGER");
+    derivedRoles.add("CASHIER");
+    derivedRoles.add("REGULAR");
+  }
+  if (baseRoles.has("MANAGER")) {
+    derivedRoles.add("CASHIER");
+    derivedRoles.add("REGULAR");
+  }
+  if (baseRoles.has("CASHIER")) {
+    derivedRoles.add("REGULAR");
+  }
+  if (!derivedRoles.size) derivedRoles.add("REGULAR");
 
-  const isSuperuser = hasRole("superuser");
-  const isManager = hasRole("manager") || isSuperuser;
-  const isCashier = hasRole("cashier") || isManager;
-  const isRegular = hasRole("regular") && !isCashier && !isManager;
+  const chosen = (() => {
+    const lower = (activeRole || "").toUpperCase();
+    if (derivedRoles.has(lower)) return lower;
+    if (derivedRoles.has("SUPERUSER")) return "SUPERUSER";
+    if (derivedRoles.has("MANAGER")) return "MANAGER";
+    if (derivedRoles.has("CASHIER")) return "CASHIER";
+    return "REGULAR";
+  })();
 
-  const items = [{ icon: Home, label: "Dashboard", path: "/" }];
+  const isSuperuser = chosen === "SUPERUSER";
+  const isManager = chosen === "MANAGER" || isSuperuser;
+  const isCashier = chosen === "CASHIER" || isManager;
+  const isRegular = chosen === "REGULAR" && !isCashier && !isManager;
+
+  const items = [];
+
   const add = (item) => {
     if (!items.some((nav) => nav.path === item.path)) {
       items.push(item);
     }
   };
 
+  // Regular user navigation
   if (isRegular) {
     add({ icon: Wallet, label: "My Points", path: "/points" });
     add({ icon: QrCode, label: "My QR Code", path: "/qr" });
@@ -58,6 +83,7 @@ export const getNavItems = (user) => {
     add({ icon: Receipt, label: "My Transactions", path: "/transactions" });
   }
 
+  // Cashier navigation
   if (isCashier) {
     add({
       icon: PlusCircle,
@@ -69,8 +95,10 @@ export const getNavItems = (user) => {
       label: "Process Redemption",
       path: "/cashier/redemptions/process",
     });
+    add({ icon: CalendarRange, label: "Events", path: "/events" });
   }
 
+  // Manager navigation
   if (isManager) {
     add({ icon: Users, label: "Users", path: "/manager/users" });
     add({
@@ -79,11 +107,18 @@ export const getNavItems = (user) => {
       path: "/transactions",
     });
     add({ icon: Tag, label: "Promotions", path: "/manager/promotions" });
-    add({ icon: CalendarRange, label: "Events", path: "/manager/events" });
+    add({ icon: CalendarRange, label: "Events", path: "/events" });
+    add({
+      icon: PlusCircle,
+      label: "Create Event",
+      path: "/manager/events/new",
+    });
   }
 
+  // Universal
   add({ icon: User, label: "Profile", path: "/profile" });
 
+  // Superuser
   if (isSuperuser) {
     add({ icon: ShieldCheck, label: "Role Management", path: "/admin/roles" });
   }

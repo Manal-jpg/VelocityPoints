@@ -15,46 +15,71 @@ export default function PromotionCard({ promo, onClick }) {
   const start = new Date(startTime);
   const end = new Date(endTime);
 
+  const typeLabel = type === "automatic" ? "Automatic" : "One-time";
+  const accentClass =
+    type === "automatic"
+      ? "from-emerald-500 to-emerald-400 border-emerald-200 text-emerald-800"
+      : "from-indigo-500 to-indigo-400 border-indigo-200 text-indigo-800";
+
   return (
     <article
-      className="border rounded-lg p-4 shadow-sm bg-white hover:shadow-md transition cursor-pointer"
       onClick={onClick}
+      className="relative bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-lg transition cursor-pointer overflow-hidden"
     >
-      <header className="mb-2">
-        <h3 className="font-semibold text-lg">{name}</h3>
-        <span className="inline-block text-xs px-2 py-0.5 mt-1 rounded-full bg-gray-100">
-          {type === "automatic" ? "Automatic" : "One-time"}
-        </span>
-      </header>
+      <div
+        className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accentClass}`}
+      />
 
-      <p className="text-sm text-gray-700 line-clamp-3">{description}</p>
-
-      <dl className="mt-3 text-xs text-gray-600 space-y-1">
-        {minSpending != null && (
-          <div className="flex gap-1">
-            <dt className="font-medium">Min Spending:</dt>
-            <dd>${minSpending}</dd>
+      <div className="p-5 space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-wide text-slate-500">
+              Promotion
+            </p>
+            <h3 className="text-lg font-semibold text-slate-900 line-clamp-1">
+              {name}
+            </h3>
+            <p className="text-sm text-slate-600 line-clamp-2">{description}</p>
           </div>
-        )}
-        {rate != null && (
-          <div className="flex gap-1">
-            <dt className="font-medium">Rate:</dt>
-            <dd>{rate}</dd>
-          </div>
-        )}
-        {points != null && (
-          <div className="flex gap-1">
-            <dt className="font-medium">Points:</dt>
-            <dd>{points}</dd>
-          </div>
-        )}
-        <div className="flex gap-1">
-          <dt className="font-medium">Valid:</dt>
-          <dd>
-            {start.toLocaleString()} – {end.toLocaleString()}
-          </dd>
+          <span
+            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border bg-white ${accentClass}`}
+          >
+            {typeLabel}
+          </span>
         </div>
-      </dl>
+
+        <div className="grid grid-cols-2 gap-2 text-sm text-slate-700">
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-3">
+            <p className="text-xs text-slate-500">Starts</p>
+            <p className="font-semibold text-slate-900">
+              {start.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-3">
+            <p className="text-xs text-slate-500">Ends</p>
+            <p className="font-semibold text-slate-900">
+              {end.toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 text-sm text-slate-800">
+          <div className="bg-white border border-slate-100 rounded-xl p-3 text-center">
+            <p className="text-xs text-slate-500">Min spend</p>
+            <p className="font-semibold">
+              {minSpending != null ? `$${minSpending}` : "—"}
+            </p>
+          </div>
+          <div className="bg-white border border-slate-100 rounded-xl p-3 text-center">
+            <p className="text-xs text-slate-500">Rate</p>
+            <p className="font-semibold">{rate ?? "—"}</p>
+          </div>
+          <div className="bg-white border border-slate-100 rounded-xl p-3 text-center">
+            <p className="text-xs text-slate-500">Points</p>
+            <p className="font-semibold">{points ?? "—"}</p>
+          </div>
+        </div>
+      </div>
     </article>
   );
 }

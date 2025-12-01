@@ -48,13 +48,15 @@ export default function PromotionsUserPage() {
   return (
     <AppLayout title="Promotions">
       <div className="space-y-6">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-          <div>
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div className="space-y-1">
             <p className="text-xs uppercase tracking-wide text-emerald-600 font-semibold">
               Earn more points
             </p>
-            <h1 className="text-2xl font-semibold text-slate-900">Latest promotions</h1>
-            <p className="text-sm text-slate-600 mt-1">
+            <h1 className="text-2xl font-semibold text-slate-900">
+              Latest promotions
+            </h1>
+            <p className="text-sm text-slate-600">
               Browse active offers and tap a card to view details.
             </p>
           </div>
@@ -82,13 +84,12 @@ export default function PromotionsUserPage() {
           </div>
         )}
 
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {promos.map((promo) => (
             <PromotionCard
               key={promo.id}
               promo={promo}
               onClick={() => navigate(`/promotions/${promo.id}/view`)}
-
             />
           ))}
         </div>
