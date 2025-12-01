@@ -26,11 +26,46 @@ const { v4: uuidv4 } = require("uuid");
 const { PrismaClient } = require("@prisma/client");
 const { expressjwt: jwt } = require("express-jwt");
 const jsonwebtoken = require("jsonwebtoken");
+const nodeFetch = require("node-fetch");
 
 const app = express();
 const prisma = new PrismaClient();
 app.use(cors());
 app.use(express.json());
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_FROM = process.env.RESEND_FROM;
+const RESEND_NOTIFY_TO = process.env.NOTIFY_EMAIL || "pointsvelocity@gmail.com";
+
+const sendEmailIfConfigured = async ({ subject, text, html, to }) => {
+  if (!RESEND_API_KEY || !RESEND_FROM) {
+    console.error("Email not sent: missing RESEND_API_KEY or RESEND_FROM");
+    return;
+  }
+  const fetcher = globalThis.fetch || nodeFetch;
+  try {
+    const res = await fetcher("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: RESEND_FROM,
+        to: Array.isArray(to) && to.length ? to : [RESEND_NOTIFY_TO],
+        subject,
+        text,
+        html,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      console.error(`Email send failed ${res.status}: ${body}`);
+    }
+  } catch (e) {
+    console.error("Email notify failed", e?.message || e);
+  }
+};
 
 const UPLOAD_ROOT = path.join(process.cwd(), "uploads");
 const AVATAR_DIR = path.join(UPLOAD_ROOT, "avatars");
@@ -82,6 +117,27 @@ app.use(async (req, _res, next) => {
 });
 
 app.get("/", (_req, res) => res.json({ ok: true }));
+
+// POST /emails - send a plain email via Resend
+// Body: { to?, subject, text?, html? }
+// Requires manager/superuser permissions
+app.post(
+  "/emails",
+  need("user", "cashier", "manager", "superuser"),
+  async (req, res) => {
+    const { to, subject, text, html } = req.body || {};
+    if (!subject || (!text && !html)) {
+      return res.status(400).json({ error: "Missing subject or content" });
+    }
+    try {
+      await sendEmailIfConfigured({ subject, text, html, to });
+      return res.status(202).json({ ok: true });
+    } catch (e) {
+      console.error("Send email endpoint failed", e?.message || e);
+      return res.status(500).json({ error: "Email send failed" });
+    }
+  }
+);
 
 app.post("/auth/tokens", async (req, res) => {
   const { utorid, password } = req.body || {};
@@ -1277,6 +1333,15 @@ app.post(
           });
         }
 
+        sendEmailIfConfigured({
+          subject: "Points Earned",
+          text: `${customer.utorid} earned ${
+            isSuspicious ? 0 : totalEarned
+          } points from a purchase (spent ${spent}). Created by ${
+            creator.utorid
+          }.`,
+        });
+
         return res.status(201).json({
           id: transaction.id,
           utorid: customer.utorid,
@@ -1333,6 +1398,11 @@ app.post(
             data: { points: { decrement: Math.abs(amount) } },
           });
         }
+
+        sendEmailIfConfigured({
+          subject: "Points Adjustment",
+          text: `${customer.utorid} had an adjustment of ${amount} points. Related transaction ${relatedId}. Created by ${creator.utorid}.`,
+        });
 
         return res.status(201).json({
           id: transaction.id,
@@ -1684,8 +1754,8 @@ app.get("/transactions", need("manager", "superuser"), async (req, res) => {
         temp.redeemed = t.redeemed;
         temp.relatedId = t.processedById;
         // Modifications made here to expose the processed variable
-          temp.processed = t.processed;
-          temp.processedBy = t.processedBy;
+        temp.processed = t.processed;
+        temp.processedBy = t.processedBy;
       } else if (t.type === "adjustment") {
         temp.relatedId = t.relatedTransactionId;
       } else if (t.type === "transfer") {
@@ -2074,6 +2144,12 @@ app.post(
       await prisma.eventGuest.create({
         data: { eventId: id, userId: uid, rsvped: true, confirmed: false },
       });
+      sendEmailIfConfigured({
+        subject: "User RSVP Confirmed",
+        text: `${req.me?.name || "A user"} (${
+          req.me?.utorid || "unknown"
+        }) RSVP'd for event ${ev.name || id}.`,
+      });
       return res.status(201).json({
         id: ev.id,
         name: ev.name,
@@ -2133,6 +2209,13 @@ app.delete(
 
     await prisma.eventGuest.delete({
       where: { eventId_userId: { eventId: id, userId: uid } },
+    });
+
+    sendEmailIfConfigured({
+      subject: "User RSVP Cancelled",
+      text: `${req.me?.name || "A user"} (${
+        req.me?.utorid || "unknown"
+      }) cancelled RSVP for event ${ev.id}.`,
     });
 
     return res.status(204).send();
@@ -2421,6 +2504,14 @@ app.post(
             },
           }),
         ]);
+        sendEmailIfConfigured({
+          subject: "Points Awarded",
+          text: `${
+            req.me?.name || "Organizer"
+          } awarded ${pts} points to ${utorid} for event ${
+            ev.name || ev.id
+          }. Remark: ${remark || "(none)"}`,
+        });
         return res.status(201).json({
           id: tx.id,
           recipient: utorid,
@@ -2488,6 +2579,15 @@ app.post(
       );
 
       const results = await prisma.$transaction(ops);
+
+      sendEmailIfConfigured({
+        subject: "Points Awarded",
+        text: `${
+          req.me?.name || "Organizer"
+        } awarded ${pts} points to all guests (${guestList.length}) for event ${
+          ev.name || ev.id
+        }. Remark: ${remark || "(none)"}`,
+      });
 
       // transaction create results are in even positions 0,2,4,... until the event update final
       const createdTxs = results.filter((r) => r && r.type === "event");
