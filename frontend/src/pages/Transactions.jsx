@@ -50,9 +50,11 @@ export default function Transactions() {
     }
 
     // Unified fetch function - respects current page, limit, and filters
-    const fetchTransactions = async () => {
-        setLoading(true);
-        setError('');
+    const fetchTransactions = async (showSpinner = true) => {
+        if (showSpinner) {
+            setLoading(true);
+            setError('');
+        }
 
         try {
             // Build params with page and limit
@@ -114,8 +116,7 @@ export default function Transactions() {
     useEffect(() => {
         if (transactionId !== '') {
             fetchById(transactionId)
-        }
-        else{
+        } else {
             fetchTransactions()
         }
 
