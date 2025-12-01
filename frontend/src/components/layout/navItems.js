@@ -59,7 +59,7 @@ export const getNavItems = (user, activeRole) => {
   const isCashier = chosen === "CASHIER" || isManager;
   const isRegular = chosen === "REGULAR" && !isCashier && !isManager;
 
-  const items = [];
+  const items = [{ icon: User, label: "Dashboard", path: "/" }];
 
   const add = (item) => {
     if (!items.some((nav) => nav.path === item.path)) {
@@ -69,32 +69,17 @@ export const getNavItems = (user, activeRole) => {
 
   // Regular user navigation
   if (isRegular) {
-    add({ icon: Wallet, label: "My Points", path: "/points" });
     add({ icon: QrCode, label: "My QR Code", path: "/qr" });
-    add({ icon: Send, label: "Transfer Points", path: "/transfer" });
-    add({ icon: Gift, label: "Redeem Points", path: "/redemptions/request" });
-    add({
-      icon: ClipboardCheck,
-      label: "Redemption QR",
-      path: "/redemptions/pending",
-    });
+    add({ icon: ClipboardCheck, label: "Redemption QR", path: "/redemptions/pending" });
     add({ icon: Tag, label: "Promotions", path: "/promotions" });
     add({ icon: CalendarRange, label: "Events", path: "/events" });
-    add({ icon: Receipt, label: "My Transactions", path: "/transactions" });
+    add({ icon: Receipt, label: "Transactions", path: "/transactions" });
   }
 
   // Cashier navigation
   if (isCashier) {
-    add({
-      icon: PlusCircle,
-      label: "New Transaction",
-      path: "/cashier/transactions/new",
-    });
-    add({
-      icon: ClipboardCheck,
-      label: "Process Redemption",
-      path: "/cashier/redemptions/process",
-    });
+    add({ icon: PlusCircle, label: "New Transaction", path: "/cashier/transactions/new" });
+    add({ icon: ClipboardCheck, label: "Process Redemption", path: "/cashier/redemptions/process" });
     add({ icon: CalendarRange, label: "Events", path: "/events" });
   }
 

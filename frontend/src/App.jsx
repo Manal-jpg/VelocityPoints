@@ -83,7 +83,14 @@ export default function App() {
       />
 
       {/* PROTECTED ROUTES */}
-      <Route path="/" element={<Navigate to="/events" replace />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/transactions"
