@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "../components/layout/Layout";
 import { api } from "../api/client";
 import { useAuth } from "../hooks/useAuth";
+import { sendEmail } from "../api/resend";
 
 export default function EventDetails() {
   const { id } = useParams();
@@ -64,7 +65,8 @@ export default function EventDetails() {
         rsvped: isRSVPed,
         numGuests: data.numGuests ?? data.guests?.length ?? 0,
         guests: data.guests || [],
-        points: data.pointsRemain ?? data.pointsAwarded ?? data.pointsTotal ?? 0,
+        points:
+          data.pointsRemain ?? data.pointsAwarded ?? data.pointsTotal ?? 0,
       });
     } catch (err) {
       console.error("LOAD EVENT ERROR:", err);
@@ -93,6 +95,14 @@ export default function EventDetails() {
         ],
       }));
       setCachedRSVP(id, true);
+      // fire-and-forget email notification
+      sendEmail({
+        to: "pointsvelocity@gmail.com",
+        subject: "User RSVP Confirmed",
+        text: `${user?.name || "A user"} (${user?.utorid}) RSVP'd for event ${
+          event?.name || id
+        }.`,
+      }).catch(() => {});
     } catch (err) {
       console.error("RSVP ERROR:", err);
       const status = err?.response?.status;
@@ -117,6 +127,13 @@ export default function EventDetails() {
         guests: prev.guests.filter((g) => g.id !== user.id),
       }));
       setCachedRSVP(id, false);
+      sendEmail({
+        to: "pointsvelocity@gmail.com",
+        subject: "User RSVP Cancelled",
+        text: `${user?.name || "A user"} (${
+          user?.utorid
+        }) cancelled RSVP for event ${event?.name || id}.`,
+      }).catch(() => {});
     } catch (err) {
       console.error("UN-RSVP ERROR:", err);
       const status = err?.response?.status;
@@ -182,6 +199,15 @@ export default function EventDetails() {
       setAwardPoints("");
       setAwardRemark("");
       if (!awardAll) setAwardUtorid("");
+      const recipient = "pointsvelocity@gmail.com";
+      const contextUser = awardAll ? "All guests" : awardUtorid.trim();
+      sendEmail({
+        to: recipient,
+        subject: "Points Awarded",
+        text: `${user?.name || "A manager"} awarded ${pts} points for event ${
+          event?.name || id
+        } to ${contextUser || "recipient"}. Remark: ${awardRemark || "(none)"}`,
+      }).catch(() => {});
     } catch (err) {
       console.error("AWARD ERROR:", err);
       const msg =
@@ -205,7 +231,9 @@ export default function EventDetails() {
   if (error || !event) {
     return (
       <AppLayout title="Event Details">
-        <div className="p-8 text-sm text-red-600">{error || "Event not found."}</div>
+        <div className="p-8 text-sm text-red-600">
+          {error || "Event not found."}
+        </div>
       </AppLayout>
     );
   }
@@ -248,9 +276,13 @@ export default function EventDetails() {
 
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
           <div className="flex flex-col gap-2">
-            <p className="text-xs uppercase tracking-wide text-emerald-600 font-semibold">Event</p>
+            <p className="text-xs uppercase tracking-wide text-emerald-600 font-semibold">
+              Event
+            </p>
             <h1 className="text-3xl font-bold text-slate-900">{event.name}</h1>
-            <p className="text-sm text-slate-600 leading-relaxed">{event.description}</p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              {event.description}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-700">
@@ -279,7 +311,10 @@ export default function EventDetails() {
             <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
               <p className="text-xs text-slate-500">Points</p>
               <p className="font-semibold text-slate-900">
-                {event.pointsRemain ?? event.pointsAwarded ?? event.pointsTotal ?? 0}
+                {event.pointsRemain ??
+                  event.pointsAwarded ??
+                  event.pointsTotal ??
+                  0}
               </p>
             </div>
             <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
@@ -300,7 +335,9 @@ export default function EventDetails() {
 
         {(isManagerPlus || isOrganizer) && (
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">Add Guest to Event</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">
+              Add Guest to Event
+            </h3>
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
@@ -323,7 +360,9 @@ export default function EventDetails() {
         {(isManagerPlus || isOrganizer) && (
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900">Award Points</h3>
+              <h3 className="text-lg font-semibold text-slate-900">
+                Award Points
+              </h3>
               <label className="inline-flex items-center gap-2 text-sm text-slate-700">
                 <input
                   type="checkbox"
@@ -352,7 +391,9 @@ export default function EventDetails() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-sm text-slate-600">Points to award</label>
+                <label className="text-sm text-slate-600">
+                  Points to award
+                </label>
                 <input
                   type="number"
                   min="1"
@@ -363,7 +404,9 @@ export default function EventDetails() {
                 />
               </div>
               <div>
-                <label className="text-sm text-slate-600">Remark (optional)</label>
+                <label className="text-sm text-slate-600">
+                  Remark (optional)
+                </label>
                 <input
                   type="text"
                   value={awardRemark}

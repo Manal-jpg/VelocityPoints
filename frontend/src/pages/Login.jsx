@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { requestPasswordReset } from "../api/auth";
+import { requestPasswordReset, notifyResetToken } from "../api/auth";
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000"
@@ -27,6 +27,7 @@ export default function Login() {
   const [resetLoading, setResetLoading] = useState(false);
   const [resetError, setResetError] = useState("");
   const [resetInfo, setResetInfo] = useState(null);
+  const [resetSent, setResetSent] = useState(false);
 
   const storedProfile = useMemo(() => {
     try {
@@ -74,15 +75,23 @@ export default function Login() {
     if (!utorid.trim()) {
       setResetError("Please enter your UTORid first.");
       setResetInfo(null);
+      setResetSent(false);
       return;
     }
 
     setResetLoading(true);
     setResetError("");
     setResetInfo(null);
+    setResetSent(false);
     try {
       const data = await requestPasswordReset({ utorid: utorid.trim() });
       setResetInfo(data);
+      try {
+        await notifyResetToken({ utorid: utorid.trim(), resetToken: data.resetToken });
+        setResetSent(true);
+      } catch (err) {
+        console.error("Reset email send failed", err);
+      }
     } catch (e) {
       console.error(e);
       setResetError(
@@ -186,17 +195,25 @@ export default function Login() {
               {resetInfo && (
                 <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800">
                   <p className="font-semibold">Reset token generated</p>
-                  <p className="break-all text-slate-700">
-                    {resetInfo.resetToken}
-                  </p>
+                  {resetSent ? (
+                    <p className="text-slate-700">
+                      We emailed the reset details to the admin inbox. Check your email to proceed.
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-slate-700">
+                        We attempted to email the reset details. If you do not receive it, contact an admin.
+                      </p>
+                      <p className="break-all text-slate-500 mt-2">
+                        Token: {resetInfo.resetToken}
+                      </p>
+                    </>
+                  )}
                   {resetInfo.expiresAt && (
                     <p className="text-xs text-slate-500 mt-1">
                       Expires: {new Date(resetInfo.expiresAt).toLocaleString()}
                     </p>
                   )}
-                  <p className="text-xs text-slate-500 mt-2">
-                    Paste this token on the reset page to set a new password.
-                  </p>
                 </div>
               )}
 

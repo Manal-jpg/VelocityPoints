@@ -52,8 +52,8 @@ export default function ResetPassword() {
           Reset password
         </h1>
         <p className="mt-2 text-sm text-slate-500">
-          Paste the reset token you received, enter your UTORid, and choose a
-          new password.
+          Enter your UTORid, paste the reset token you received by email, and
+          choose a new password.
         </p>
 
         {error && (
