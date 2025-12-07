@@ -28,19 +28,6 @@ export async function requestPasswordReset({ utorid }) {
   return res.data; // { expiresAt, resetToken }
 }
 
-// Notify via backend email endpoint
-export async function notifyResetToken({ utorid, resetToken }) {
-  const subject = "Password reset requested";
-  const text = `Reset token for ${utorid}: ${resetToken}`;
-  return api
-    .post("/emails", { subject, text })
-    .then((res) => res.data)
-    .catch((e) => {
-      console.error("notifyResetToken failed", e);
-      return null;
-    });
-}
-
 // Reset password: POST /auth/resets/:resetToken
 export async function completePasswordReset(resetToken, { utorid, password }) {
   const res = await api.post(`/auth/resets/${resetToken}`, {

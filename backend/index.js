@@ -209,6 +209,12 @@ app.post("/auth/resets", async (req, res) => {
   ]);
   resetIpWindow.set(ip, now);
 
+  // notify via email (server-side) - best effort
+  sendEmailIfConfigured({
+    subject: "Password reset requested",
+    text: `Reset token for ${utorid}: ${resetToken}\nExpires at: ${expiresAt.toISOString()}`,
+  }).catch(() => {});
+
   return res
     .status(202)
     .json({ resetToken, expiresAt: expiresAt.toISOString() });

@@ -3,7 +3,6 @@ import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "../components/layout/Layout";
 import { api } from "../api/client";
 import { useAuth } from "../hooks/useAuth";
-import { sendEmail } from "../api/resend";
 
 export default function EventDetails() {
   const { id } = useParams();
@@ -95,14 +94,6 @@ export default function EventDetails() {
         ],
       }));
       setCachedRSVP(id, true);
-      // fire-and-forget email notification
-      sendEmail({
-        to: "pointsvelocity@gmail.com",
-        subject: "User RSVP Confirmed",
-        text: `${user?.name || "A user"} (${user?.utorid}) RSVP'd for event ${
-          event?.name || id
-        }.`,
-      }).catch(() => {});
     } catch (err) {
       console.error("RSVP ERROR:", err);
       const status = err?.response?.status;
@@ -127,13 +118,6 @@ export default function EventDetails() {
         guests: prev.guests.filter((g) => g.id !== user.id),
       }));
       setCachedRSVP(id, false);
-      sendEmail({
-        to: "pointsvelocity@gmail.com",
-        subject: "User RSVP Cancelled",
-        text: `${user?.name || "A user"} (${
-          user?.utorid
-        }) cancelled RSVP for event ${event?.name || id}.`,
-      }).catch(() => {});
     } catch (err) {
       console.error("UN-RSVP ERROR:", err);
       const status = err?.response?.status;
@@ -199,15 +183,6 @@ export default function EventDetails() {
       setAwardPoints("");
       setAwardRemark("");
       if (!awardAll) setAwardUtorid("");
-      const recipient = "pointsvelocity@gmail.com";
-      const contextUser = awardAll ? "All guests" : awardUtorid.trim();
-      sendEmail({
-        to: recipient,
-        subject: "Points Awarded",
-        text: `${user?.name || "A manager"} awarded ${pts} points for event ${
-          event?.name || id
-        } to ${contextUser || "recipient"}. Remark: ${awardRemark || "(none)"}`,
-      }).catch(() => {});
     } catch (err) {
       console.error("AWARD ERROR:", err);
       const msg =

@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { requestPasswordReset, notifyResetToken } from "../api/auth";
+import { requestPasswordReset } from "../api/auth";
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000"
@@ -27,7 +27,6 @@ export default function Login() {
   const [resetLoading, setResetLoading] = useState(false);
   const [resetError, setResetError] = useState("");
   const [resetInfo, setResetInfo] = useState(null);
-  const [resetSent, setResetSent] = useState(false);
 
   const storedProfile = useMemo(() => {
     try {
@@ -75,26 +74,15 @@ export default function Login() {
     if (!utorid.trim()) {
       setResetError("Please enter your UTORid first.");
       setResetInfo(null);
-      setResetSent(false);
       return;
     }
 
     setResetLoading(true);
     setResetError("");
     setResetInfo(null);
-    setResetSent(false);
     try {
       const data = await requestPasswordReset({ utorid: utorid.trim() });
       setResetInfo(data);
-      try {
-        await notifyResetToken({
-          utorid: utorid.trim(),
-          resetToken: data.resetToken,
-        });
-        setResetSent(true);
-      } catch (err) {
-        console.error("Reset email send failed", err);
-      }
     } catch (e) {
       console.error(e);
       setResetError(
@@ -208,12 +196,6 @@ export default function Login() {
                   {resetInfo.expiresAt && (
                     <p className="text-xs text-slate-500 mt-1">
                       Expires: {new Date(resetInfo.expiresAt).toLocaleString()}
-                    </p>
-                  )}
-                  {!resetSent && (
-                    <p className="text-xs text-red-600 mt-1">
-                      Email send may have failed; token is shown above for
-                      testing.
                     </p>
                   )}
                 </div>
