@@ -45,7 +45,10 @@ function ManagerRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
 
-  if (!user || (user.role !== "manager" && user.role !== "superuser")) {
+  if (
+    !user ||
+    (user.role !== "manager" && user.role !== "superuser" && user.role !== "cashier")
+  ) {
     return <Navigate to="/" replace />;
   }
 

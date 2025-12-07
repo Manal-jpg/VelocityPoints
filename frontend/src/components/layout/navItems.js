@@ -80,6 +80,7 @@ export const getNavItems = (user, activeRole) => {
   if (isCashier) {
     add({ icon: PlusCircle, label: "New Transaction", path: "/cashier/transactions/new" });
     add({ icon: ClipboardCheck, label: "Process Redemption", path: "/cashier/redemptions/process" });
+    add({ icon: Users, label: "Users", path: "/manager/users" });
     add({ icon: CalendarRange, label: "Events", path: "/events" });
   }
 
