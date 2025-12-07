@@ -70,7 +70,11 @@ export const getNavItems = (user, activeRole) => {
   // Regular user navigation
   if (isRegular) {
     add({ icon: QrCode, label: "My QR Code", path: "/qr" });
-    add({ icon: ClipboardCheck, label: "Redemption QR", path: "/redemptions/pending" });
+    add({
+      icon: ClipboardCheck,
+      label: "Redemption QR",
+      path: "/redemptions/pending",
+    });
     add({ icon: Tag, label: "Promotions", path: "/promotions" });
     add({ icon: CalendarRange, label: "Events", path: "/events" });
     add({ icon: Receipt, label: "Transactions", path: "/transactions" });
@@ -78,8 +82,7 @@ export const getNavItems = (user, activeRole) => {
 
   // Cashier navigation
   if (isCashier) {
-    add({ icon: PlusCircle, label: "New Transaction", path: "/cashier/transactions/new" });
-    add({ icon: ClipboardCheck, label: "Process Redemption", path: "/cashier/redemptions/process" });
+    add({ icon: Receipt, label: "Transactions", path: "/transactions" });
     add({ icon: Users, label: "Users", path: "/manager/users" });
     add({ icon: CalendarRange, label: "Events", path: "/events" });
   }
