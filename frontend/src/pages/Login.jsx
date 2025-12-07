@@ -87,7 +87,10 @@ export default function Login() {
       const data = await requestPasswordReset({ utorid: utorid.trim() });
       setResetInfo(data);
       try {
-        await notifyResetToken({ utorid: utorid.trim(), resetToken: data.resetToken });
+        await notifyResetToken({
+          utorid: utorid.trim(),
+          resetToken: data.resetToken,
+        });
         setResetSent(true);
       } catch (err) {
         console.error("Reset email send failed", err);
@@ -195,23 +198,22 @@ export default function Login() {
               {resetInfo && (
                 <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800">
                   <p className="font-semibold">Reset token generated</p>
-                  {resetSent ? (
-                    <p className="text-slate-700">
-                      We emailed the reset details to the admin inbox. Check your email to proceed.
-                    </p>
-                  ) : (
-                    <>
-                      <p className="text-slate-700">
-                        We attempted to email the reset details. If you do not receive it, contact an admin.
-                      </p>
-                      <p className="break-all text-slate-500 mt-2">
-                        Token: {resetInfo.resetToken}
-                      </p>
-                    </>
-                  )}
+                  <p className="text-slate-700">
+                    We emailed the reset details to the admin inbox. You can
+                    also copy the token below for testing.
+                  </p>
+                  <p className="break-all text-slate-600 mt-2">
+                    Token: {resetInfo.resetToken}
+                  </p>
                   {resetInfo.expiresAt && (
                     <p className="text-xs text-slate-500 mt-1">
                       Expires: {new Date(resetInfo.expiresAt).toLocaleString()}
+                    </p>
+                  )}
+                  {!resetSent && (
+                    <p className="text-xs text-red-600 mt-1">
+                      Email send may have failed; token is shown above for
+                      testing.
                     </p>
                   )}
                 </div>

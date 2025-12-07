@@ -111,7 +111,11 @@ export default function ManagerUsers() {
   const [createSuccess, setCreateSuccess] = useState("");
   const [createLoading, setCreateLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [editForm, setEditForm] = useState({ verified: false, role: "" });
+  const [editForm, setEditForm] = useState({
+    verified: false,
+    role: "",
+    suspicious: false,
+  });
   const [editError, setEditError] = useState("");
   const [editSuccess, setEditSuccess] = useState("");
   const [editLoading, setEditLoading] = useState(false);
@@ -239,6 +243,7 @@ export default function ManagerUsers() {
     setEditForm({
       verified: Boolean(userToEdit?.verified),
       role: userToEdit?.role || "",
+      suspicious: Boolean(userToEdit?.suspicious),
     });
     setEditError("");
     setEditSuccess("");
@@ -246,7 +251,7 @@ export default function ManagerUsers() {
 
   const handleCloseEdit = () => {
     setSelectedUser(null);
-    setEditForm({ verified: false, role: "" });
+    setEditForm({ verified: false, role: "", suspicious: false });
     setEditError("");
     setEditSuccess("");
   };
@@ -255,7 +260,10 @@ export default function ManagerUsers() {
     e.preventDefault();
     if (!selectedUser) return;
 
-    const payload = { verified: Boolean(editForm.verified) };
+    const payload = {
+      verified: Boolean(editForm.verified),
+      suspicious: Boolean(editForm.suspicious),
+    };
 
     // Only include role changes if the current user has permission.
     if (roleEditOptions.length && editForm.role) {
@@ -710,6 +718,24 @@ export default function ManagerUsers() {
                 />
                 <label htmlFor="verified" className="text-sm text-[#3f3f46]">
                   Mark as verified
+                </label>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input
+                  id="suspicious"
+                  type="checkbox"
+                  checked={Boolean(editForm.suspicious)}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      suspicious: e.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 rounded border-[#e4e4e7] text-[#f59e0b] focus:ring-[#f59e0b]"
+                />
+                <label htmlFor="suspicious" className="text-sm text-[#3f3f46]">
+                  Mark as suspicious
                 </label>
               </div>
 
