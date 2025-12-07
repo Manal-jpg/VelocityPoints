@@ -10,11 +10,7 @@ export function AuthProvider({ children }) {
   const [availableRoles, setAvailableRoles] = useState([]);
 
   const getAvailableRoles = (u) => {
-    const base = Array.isArray(u?.roles)
-      ? u.roles
-      : u?.role
-      ? [u.role]
-      : [];
+    const base = Array.isArray(u?.roles) ? u.roles : u?.role ? [u.role] : [];
     const set = new Set(base.map((r) => String(r || "").toLowerCase()));
     // add lower-level interfaces
     if (set.has("superuser")) {
@@ -110,6 +106,8 @@ export function AuthProvider({ children }) {
     if (availableRoles.includes(lower)) {
       setActiveRole(lower);
       localStorage.setItem("activeInterface", lower);
+      // force a reload back to dashboard so layout/nav fully refreshes
+      window.location.assign("/");
     }
   };
 
