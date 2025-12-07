@@ -30,14 +30,14 @@ const getBorderColor = (type) => {
     return colors[type] || "#71717a"; // Default gray
 };
 
-export function TransactionList({filteredTransactions, setSelectedTransaction}) {
+export function TransactionList({transactions, setSelectedTransaction, hasPermissions, user, totalCount}) {
     return (
         // {Transaction List Heading}
         <div>
             <div>
                 <div className={"flex items-center justify-between mb-4"}>
                     <h3 className={"text-lg font-semibold text-slate-900"}>
-                        Showing {filteredTransactions.length} Transaction{filteredTransactions.length !== 1 ? "s" : ""}
+                        Showing {totalCount} Transaction{totalCount !== 1 ? "s" : ""}
                     </h3>
                     <div className={"flex items-center gap-2 text-sm text-slate-500"}>
                         <span> Nov 2025</span>
@@ -47,7 +47,7 @@ export function TransactionList({filteredTransactions, setSelectedTransaction}) 
 
 
             <div className={"space-y-3"}>
-                {filteredTransactions.map((t) => (
+                {transactions.map((t) => (
                     <TransactionCard
                         key={t.id}
                         id={t.id}
@@ -61,6 +61,9 @@ export function TransactionList({filteredTransactions, setSelectedTransaction}) 
                         processed={t.processed}
                         transaction={t}
                         onClick={() => setSelectedTransaction(t)}
+                        hasPermissions={hasPermissions}
+                        user={user}
+
                     />
                 ))}
             </div>

@@ -1,5 +1,5 @@
 // transactions page
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useState} from "react";
 import {AppLayout} from "../components/layout/Layout";
 import {useAuth} from "../hooks/useAuth";
 import {TransactionStats} from "../components/transaction/TransactionStats.jsx";
@@ -9,7 +9,7 @@ import {Pagination} from "../components/transaction/Pagination.jsx";
 import {TransactionList} from "../components/transaction/TransactionList.jsx";
 import {TransactionDetails} from "../components/transaction/TransactionDetails.jsx";
 import {CreateTransaction} from "../components/transaction/CreateTransaction.jsx"
-import {getAllTransactions, getUserTransactions} from "../api/transactions.js";
+import {getAllTransactions, getTransactionById, getUserTransactions} from "../api/transactions.js";
 
 export default function Transactions() {
     const {user} = useAuth();
@@ -26,22 +26,13 @@ export default function Transactions() {
     // implementing pagination here
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
-    const [limit, setLimit] = useState(20);
+    const [limit, setLimit] = useState(10);
     const totalPages = Math.ceil(totalCount / limit);
 
 
     // pagination is not included here
     const [advancedFilters, setAdvancedFilters] = useState({
-        name: "",
-        createdBy: "",
-        suspicious: "",
-        promotionId: "",
-        relatedId: "",
-        amount: 0,
-        operator: "",
-        type: "all",
-        page: currentPage,
-        limit: limit
+        name: "", createdBy: "", suspicious: "", promotionId: "", relatedId: "", amount: '', operator: "", type: "all"
     });
 
     const quickFilters = [{value: "all", label: "All Transactions"}, {
@@ -58,127 +49,89 @@ export default function Transactions() {
         return role.includes(user.role);
     }
 
-    const filteredTransactions = useMemo(() => {
-        return transactions.filter(t => {
-            // ID search (exact match - highest priority)
-            if (transactionId !== '' && !t.id.toString().includes(transactionId)) return false;
-
-            // Type filter
-            if (advancedFilters.type !== "all" && advancedFilters.type !== t.type) return false;
-
-            // Name filter
-            if (advancedFilters.name && t.utorid && !t.utorid.toLowerCase().includes(advancedFilters.name.toLowerCase())) return false;
-
-            // Created By filter
-            if (advancedFilters.createdBy && t.createdBy && !t.createdBy.toLowerCase().includes(advancedFilters.createdBy.toLowerCase())) return false;
-
-            // Suspicious filter
-            if (advancedFilters.suspicious !== "" && t.suspicious !== (advancedFilters.suspicious === "true")) return false;
-
-            // Promotion ID filter
-            if (advancedFilters.promotionId && t.promotionIds && !t.promotionIds.includes(parseInt(advancedFilters.promotionId))) return false;
-
-            // Related ID filter
-            if (advancedFilters.relatedId && t.relatedId !== parseInt(advancedFilters.relatedId)) return false;
-
-            // Amount filter with operator
-            if (advancedFilters.operator && advancedFilters.amount) {
-                const amount = parseInt(advancedFilters.amount);
-                if (advancedFilters.operator === 'gte' && t.amount < amount) return false;
-                if (advancedFilters.operator === 'lte' && t.amount > amount) return false;
-                if (advancedFilters.operator === 'eq' && t.amount !== amount) return false;
-            }
-
-            return true;
-        });
-    }, [transactions, advancedFilters, transactionId]);
-    console.log(filteredTransactions)
-
-    const refreshTransactions = async () => {
-        const reqParams = {...advancedFilters, type: advancedFilters.type === "all" ? null :
-                advancedFilters.type};
-
-        const newTransactions = hasPermissions(['manager', 'superuser'])
-            ? await getAllTransactions(reqParams)
-            : await getUserTransactions(reqParams);
-
-        setTransactions(newTransactions.results || []);
-    }
-
-    useEffect(() => {
-        const fetchTransactions = async () => {
+    // Unified fetch function - respects current page, limit, and filters
+    const fetchTransactions = async (showSpinner = true) => {
+        if (showSpinner) {
             setLoading(true);
             setError('');
+        }
 
-            try {
-                const params = {
-                    page: currentPage,
-                    limit: limit,
-                    // ... all your filters
-                };
+        try {
+            // Build params with page and limit
+            const params = {
+                page: currentPage, limit: limit
+            };
 
-                // Switch endpoint based on role
-                const data = hasPermissions(['manager', 'superuser'])
-                    ? await getAllTransactions(params)      // Managers see ALL
-                    : await getUserTransactions(params);     // Regular users see ONLY theirs
-
-                setTransactions(data.results || []); // Adjust based on your API response
-                setTotalCount(data.count || 0);
-            } catch (err) {
-                setError(err.message);
-                console.error('Failed to fetch transactions:', err);
-            } finally {
-                setLoading(false);
+            // Only add filters if they have valid values
+            if (advancedFilters.type && advancedFilters.type !== "all") {
+                params.type = advancedFilters.type;
             }
-        };
 
-        fetchTransactions();
-    }, [currentPage, limit]); // Empty array = run once on mount
+            if (advancedFilters.name && advancedFilters.name.trim() !== "") {
+                params.name = advancedFilters.name;
+            }
 
-    // useEffect(() => {
-    //     const fetchTransactions = async () => {
-    //         setLoading(true);
-    //         setError('');
-    //
-    //         try {
-    //             // Build query params from filters
-    //             const params = {
-    //                 page: currentPage,
-    //                 limit: limit,
-    //
-    //                 // Only include active filters
-    //                 ...(advancedFilters.type !== "all" && {type: advancedFilters.type}),
-    //                 ...(advancedFilters.name && {name: advancedFilters.name}),
-    //                 ...(advancedFilters.createdBy && {createdBy: advancedFilters.createdBy}),
-    //                 ...(advancedFilters.suspicious !== "" && {
-    //                     suspicious: advancedFilters.suspicious
-    //                 }),
-    //                 ...(advancedFilters.promotionId && {
-    //                     promotionId:
-    //                         parseInt(advancedFilters.promotionId)
-    //                 }),
-    //                 ...(advancedFilters.relatedId && {
-    //                     relatedId: parseInt(advancedFilters.relatedId)
-    //                 }),
-    //                 ...(advancedFilters.operator && advancedFilters.amount && {
-    //                     amount: parseInt(advancedFilters.amount),
-    //                     operator: advancedFilters.operator
-    //                 }),
-    //                 ...(transactionId !== '' && {transactionId: parseInt(transactionId)})
-    //             };
-    //
-    //             const data = await getAllTransactions(params);
-    //             setTransactions(data.results || []);
-    //             setTotalCount(data.count || 0);
-    //         } catch (err) {
-    //             setError(err.message);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-    //
-    //     fetchTransactions();
-    // }, [currentPage, limit, advancedFilters, transactionId]); // Re-fetch when filters change
+            if (advancedFilters.createdBy && advancedFilters.createdBy.trim() !== "") {
+                params.createdBy = advancedFilters.createdBy;
+            }
+
+            if (advancedFilters.suspicious !== "") {
+                params.suspicious = advancedFilters.suspicious;
+            }
+
+            if (advancedFilters.promotionId && advancedFilters.promotionId.trim() !== "") {
+                params.promotionId = parseInt(advancedFilters.promotionId);
+            }
+
+            if (advancedFilters.relatedId && advancedFilters.relatedId.trim() !== "") {
+                params.relatedId = parseInt(advancedFilters.relatedId);
+            }
+
+            // CRITICAL: Only include amount if BOTH amount AND operator are valid
+            if (advancedFilters.amount && advancedFilters.amount !== '' && advancedFilters.amount !== '0' && advancedFilters.operator && advancedFilters.operator !== '') {
+                params.amount = parseInt(advancedFilters.amount);
+                params.operator = advancedFilters.operator;
+            }
+
+            if (transactionId && transactionId !== '') {
+                params.transactionId = parseInt(transactionId);
+            }
+
+            // Switch endpoint based on role
+            const data = hasPermissions(['manager', 'superuser']) ? await getAllTransactions(params) : await getUserTransactions(params);
+
+            setTransactions(data.results || []);
+            setTotalCount(data.count || 0);
+        } catch (err) {
+            setError(err.message);
+            console.error('Failed to fetch transactions:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    const fetchById = async (id) => {
+        const data = await getTransactionById(id)
+        setTransactions([data])
+    }
+    useEffect(() => {
+        if (transactionId !== '') {
+            fetchById(transactionId)
+        } else {
+            fetchTransactions()
+        }
+
+
+    }, [transactionId])
+
+    useEffect(() => {
+        // Debounce: Wait 500ms after user stops typing before fetching
+        const timer = setTimeout(() => {
+            fetchTransactions();
+        }, 500);
+
+        // Cancel previous timer if user keeps typing
+        return () => clearTimeout(timer);
+    }, [currentPage, limit, advancedFilters]); // Re-fetch when filters change
 
 
     if (loading) {
@@ -208,7 +161,7 @@ export default function Transactions() {
 
 
             {/*{transaction stats}*/}
-            {hasPermissions(['regular', "cashier"]) && (<TransactionStats transactions={transactions} user={user}/>
+            {hasPermissions(['regular', "cashier"]) && (<TransactionStats totalCount={totalCount} user={user}/>
 
             )}
 
@@ -223,39 +176,38 @@ export default function Transactions() {
                                 page={currentPage} setPage={setCurrentPage} limit={limit} setLimit={setLimit}
             />
 
-            <TransactionList filteredTransactions={filteredTransactions} setSelectedTransaction={setSelectedTransaction}
-
-            />
+            <TransactionList transactions={transactions} setSelectedTransaction={setSelectedTransaction}
+                             hasPermissions={hasPermissions} user={user} totalCount={totalCount}/>
 
             {selectedTransaction && (
                 <TransactionDetails transaction={selectedTransaction} hasPermissions={hasPermissions}
-                                    onRefresh={refreshTransactions}
+                                    onRefresh={fetchTransactions}
                                     onClose={() => setSelectedTransaction(null)}
                 />)}
 
             {showCreatePurchase && (<CreateTransaction title={"Create Purchase"}
                                                        onClose={() => setShowCreatePurchase(false)} type={"purchase"}
-                                                       onSuccess={refreshTransactions}> </CreateTransaction>)
+                                                       onSuccess={fetchTransactions}> </CreateTransaction>)
 
             }
 
             {showCreateTransfer && (<CreateTransaction title={"Create Transfer"}
                                                        onClose={() => setShowCreateTransfer(false)} type={"transfer"}
-                                                       onSuccess={refreshTransactions}> </CreateTransaction>)
+                                                       onSuccess={fetchTransactions}> </CreateTransaction>)
 
             }
 
             {showCreateRedemption && (<CreateTransaction title={"Create Redemption"}
                                                          onClose={() => setShowCreateRedemption(false)}
                                                          type={"redemption"}
-                                                         onSuccess={refreshTransactions}> </CreateTransaction>)
+                                                         onSuccess={fetchTransactions}> </CreateTransaction>)
 
             }
 
             {showCreateAdjustment && (<CreateTransaction title={"Create Adjustment"}
                                                          onClose={() => setShowCreateAdjustment(false)}
                                                          type={"adjustment"}
-                                                         onSuccess={refreshTransactions}> </CreateTransaction>)
+                                                         onSuccess={fetchTransactions}> </CreateTransaction>)
 
             }
 

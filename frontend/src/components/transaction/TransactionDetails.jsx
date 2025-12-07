@@ -14,7 +14,7 @@ import {
     X
 } from "lucide-react";
 import {processRedemptionTransaction, toggleTransactionSuspicious} from "../../api/transactions.js";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 // Format ISO date to readable format
 const formatDate = (isoDate) => {
@@ -66,8 +66,20 @@ export function TransactionDetails({transaction, onClose, hasPermissions, onRefr
     const [isSuspicious, setisSuspicious] = useState(transaction?.suspicious);
     const [processed, setProcessed] = useState(transaction?.processed);
     const [loading, setLoading] = useState(false);
+    // useEffect(() => {
+    //     setisSuspicious(transaction?.suspicious ?? false);
+    // }, [transaction?.id, transaction?.suspicious]);
+    //
+    // useEffect(() => {
+    //     setProcessed(transaction?.processed ?? false);
+    // }, [transaction?.id, transaction?.processed]);
+
     if (!transaction) return null
     const bgColor = getTransactionColor(transaction.type);
+
+
+
+
 
     // API CALL GOES HERE
 
@@ -78,7 +90,7 @@ export function TransactionDetails({transaction, onClose, hasPermissions, onRefr
             const response = await toggleTransactionSuspicious(payload, transactionId);
             console.log(response);
             setisSuspicious(!isSuspicious)
-            onRefresh();
+            onRefresh(false);
 
         } catch (err) {
             console.error('Failed to toggle:', err);
@@ -98,7 +110,7 @@ export function TransactionDetails({transaction, onClose, hasPermissions, onRefr
             const res = await processRedemptionTransaction(payload, transactionId);
             console.log(res);
             setProcessed(true)
-            onRefresh();
+            onRefresh(false);
         } catch (err) {
             console.error('Failed to Process Redemption:', err);
             alert(err.message);

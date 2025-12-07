@@ -1,7 +1,7 @@
 import {AlertTriangle, ArrowRightLeft, Calendar, ChevronRight, Gift, Settings, ShoppingCart} from "lucide-react";
 
 export function TransactionCard({
-                                    id, title, amount, type, borderColor, suspicious, processed, onClick, transaction
+                                    id, title, amount, type, borderColor, suspicious, processed, onClick, transaction, hasPermissions, user
                                 }) {
 
     const renderIcon = (type) => {
@@ -44,18 +44,32 @@ export function TransactionCard({
 
                 </div>
                 {/* Date/time will go here */}
+
                 <p className={"text-sm  text-slate-500 mb-1"}>
-                    {["redemption", "purchase", "adjustment"].includes(type) && `Customer: ${transaction.utorid}`}
+                    {["redemption", "purchase", "adjustment"].includes(type) && `Customer: ${transaction.utorid || user.utorid}`}
                 </p>
-                {type === "transfer" && (<div>
+
+
+
+                {type === "transfer" && hasPermissions(["superuser", "manager"]) && (<div>
                     <p className={"text-sm  text-slate-500 mb-1"}>
                         {`Sender: ${transaction.utorid}`}
                     </p>
                     <p className={"text-sm  text-slate-500 mb-1"}>
-                        {`Recipient User ID: ${transaction.relatedId}`}
+                        {`Recipient: ${transaction.relatedUtorid || 'User #' + transaction.relatedId}`}
 
                     </p>
 
+                </div>)}
+
+                {type === "transfer" && hasPermissions(["cashier", "regular"]) && (<div>
+                    <p className={"text-sm  text-slate-500 mb-1"}>
+                        {`Sender: ${user.utorid}`}
+                    </p>
+                    <p className={"text-sm  text-slate-500 mb-1"}>
+                        {`Recipient: ${transaction.relatedUtorid || 'User #' + transaction.relatedId}`}
+
+                    </p>
 
                 </div>)}
 

@@ -9,7 +9,7 @@ export function TransactionFilters({
                                        hasPermissions,
                                        setTransactionId,
                                        transactionId,
-                                       currentPage, setCurrentPage, limit, setLimit,
+                                       currentPage, setPage, limit, setLimit,
                                    }) {
 
     return (
@@ -40,7 +40,7 @@ export function TransactionFilters({
                 </button>))}
 
                 {/* Transaction ID Search */}
-                {hasPermissions["manager", "superuser"] && (
+                {hasPermissions(["manager", "superuser"]) && (
                     <div className="flex items-center gap-2">
                         <input type={"number"} placeholder={"Find by ID"}
                                value={transactionId}
@@ -114,7 +114,7 @@ export function TransactionFilters({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
                     {/* Name/UTORid Search */}
-                    {hasPermissions["manager", "superuser"] && (
+                    {hasPermissions(["manager", "superuser"]) && (
 
                         <div>
                             <label className="block text-sm text-slate-600 mb-1.5">
@@ -137,7 +137,7 @@ export function TransactionFilters({
 
 
                     {/* Created By */}
-                    {hasPermissions["manager", "superuser"] && (
+                    {hasPermissions(["manager", "superuser"]) && (
                         <div>
                             <label className="block text-sm text-slate-600 mb-1.5">
                                 Created By (UTORid)
@@ -261,7 +261,13 @@ export function TransactionFilters({
                         <input
                             type="number"
                             value={currentPage}
-                            onChange={(e) => setCurrentPage(parseInt(e.target.value, 10))}
+                            onChange={(e) => {
+                                const val = parseInt(e.target.value, 10);
+                                if (!isNaN(val) && val >= 1) {
+                                    setPage(val);
+                                }
+                            }}
+                            min="1"
                             className="w-full px-3 py-2 border border-slate-200 rounded-lg
   text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         />
