@@ -1,4 +1,4 @@
-import { Search, Bell, Settings, LogOut, User, Shuffle } from "lucide-react";
+import { Search, Bell, LogOut, User, Shuffle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -106,9 +106,6 @@ export function TopBar({ title, showSearch = true }) {
       <div className="flex items-center gap-2">
         <button className="w-10 h-10 rounded-[10px] hover:bg-[#fafaf9] flex items-center justify-center transition-all">
           <Bell size={20} strokeWidth={1.5} className="text-[#71717a]" />
-        </button>
-        <button className="w-10 h-10 rounded-[10px] hover:bg-[#fafaf9] flex items-center justify-center transition-all">
-          <Settings size={20} strokeWidth={1.5} className="text-[#71717a]" />
         </button>
         <div className="relative" ref={menuRef}>
           <button

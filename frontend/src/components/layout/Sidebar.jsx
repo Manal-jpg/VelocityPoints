@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Settings, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { getNavItems } from "./navItems";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -62,16 +62,8 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      {/* Settings + Gold badge */}
+      {/* Gold badge */}
       <div className="p-3 border-t border-[#f4f4f5]">
-        <Link
-          to="/settings"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[#71717a] hover:bg-[#f9fafb] hover:text-[#18181b] mb-4 transition-all"
-        >
-          <Settings size={20} strokeWidth={1.5} />
-          <span className="text-[15px]">Settings</span>
-        </Link>
-
         <div className="bg-gradient-to-br from-[#ffc947] to-[#ffb020] p-4 rounded-2xl text-white relative overflow-hidden">
           <div
             className="absolute inset-0 opacity-5"
