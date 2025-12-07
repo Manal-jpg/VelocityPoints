@@ -450,6 +450,11 @@ app.post(
         },
       });
 
+      sendEmailIfConfigured({
+        subject: "Redemption Requested",
+        text: `${user.utorid} requested a redemption of ${amount} points. Pending processing.`,
+      }).catch(() => {});
+
       return res.status(201).json({
         id: transaction.id,
         utorid: user.utorid,
@@ -542,6 +547,11 @@ app.post(
 
         return t1;
       });
+
+      sendEmailIfConfigured({
+        subject: "Points Transfer",
+        text: `${sender.utorid} transferred ${amount} points to ${recipient.utorid}. Remark: ${remark || "(none)"}`,
+      }).catch(() => {});
 
       return res.status(201).json({
         id: senderTx.id,
@@ -1624,6 +1634,11 @@ app.patch(
       let processedBy = await prisma.user.findUnique({
         where: { id: processedById },
       });
+
+      sendEmailIfConfigured({
+        subject: "Redemption Processed",
+        text: `${transaction.user.utorid}'s redemption of ${transaction.redeemed} points was processed by ${processedBy.utorid}.`,
+      }).catch(() => {});
 
       const response = {
         id: transaction.id,
