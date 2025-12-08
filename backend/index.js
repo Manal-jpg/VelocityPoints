@@ -100,8 +100,10 @@ const toInt = (v, d) => {
 };
 const toBool = (v) => v === true || v === "true";
 
+const JWT_SECRET = process.env.JWT_SECRET || "change-me";
+
 const auth = jwt({
-  secret: "anylongrandomsecret",
+  secret: JWT_SECRET,
   algorithms: ["HS256"],
 }).unless({ path: ["/auth/tokens", /^\/auth\/resets(\/.*)?$/] });
 app.use(auth);
@@ -550,7 +552,9 @@ app.post(
 
       sendEmailIfConfigured({
         subject: "Points Transfer",
-        text: `${sender.utorid} transferred ${amount} points to ${recipient.utorid}. Remark: ${remark || "(none)"}`,
+        text: `${sender.utorid} transferred ${amount} points to ${
+          recipient.utorid
+        }. Remark: ${remark || "(none)"}`,
       }).catch(() => {});
 
       return res.status(201).json({
