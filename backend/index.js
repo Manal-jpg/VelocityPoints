@@ -359,6 +359,7 @@ app.get(
         skip: skip,
         take: l,
         include: {
+          user: true,
           promotions: { include: { promotion: true } },
           createdBy: true,
           relatedUser: true,
@@ -380,6 +381,7 @@ app.get(
           createdBy: t.createdBy.utorid,
           createdAt: t.createdAt,
           processed: t.processed,
+          utorid: t.user?.utorid,
         };
 
         if (t.type === "purchase") {
