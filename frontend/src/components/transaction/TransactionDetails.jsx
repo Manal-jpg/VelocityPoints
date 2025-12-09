@@ -294,16 +294,18 @@ export function TransactionDetails({transaction, onClose, hasPermissions, onRefr
                         </div>
 
                         {/* Promotions Applied */}
-
-                        <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
-                            <Tag size={20} className="text-slate-400 mt-0.5"/>
-                            <div>
-                                <p className="text-xs text-slate-500 mb-1">Promotions Applied</p>
-                                <p className="text-base text-slate-900">
-                                    {transaction.promotionIds.reduce((acc, currentValue) => acc + " " + "#" + currentValue + " ", "")}
-                                </p>
+                        {transaction?.promotionIds.length !== 0 && (
+                            <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
+                                <Tag size={20} className="text-slate-400 mt-0.5"/>
+                                <div>
+                                    <p className="text-xs text-slate-500 mb-1">Promotions Applied</p>
+                                    <p className="text-base text-slate-900">
+                                        {transaction.promotionIds.reduce((acc, currentValue) => acc + " " + "#" + currentValue + " ", "") || "No Promotions Applied"}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        )}
+
 
 
                         {transaction.processed && transaction.processedBy?.utorid && (
