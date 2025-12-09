@@ -6,7 +6,7 @@ import { useAuth } from "../hooks/useAuth";
 
 export default function EventDetails() {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
   const navigate = useNavigate();
 
   const [event, setEvent] = useState(null);
@@ -22,9 +22,8 @@ export default function EventDetails() {
   const [awarding, setAwarding] = useState(false);
   const [awardError, setAwardError] = useState("");
 
-  const isManagerPlus = ["manager", "superuser"].includes(
-    user?.role?.toLowerCase()
-  );
+  const role = (activeRole || user?.role || "").toLowerCase();
+  const isManagerPlus = ["manager", "superuser"].includes(role);
 
   // local cache to remember RSVP status for regular users when backend doesn't return membership
   const getCachedRSVP = (eventId) => {
