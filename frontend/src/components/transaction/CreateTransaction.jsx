@@ -11,8 +11,8 @@ import {
 const createData = (formData) => {
     if (formData.type === "purchase") {
         return {
-            utorid: formData.utorid,
-            spent: parseFloat(formData.spent),
+            utorid: formData.utorid?.trim(),
+            spent: Number(formData.spent),
             remark: formData.remark,
             promotionIds: formData.promotionIds,
             type: formData.type,
@@ -22,8 +22,8 @@ const createData = (formData) => {
 
     if (formData.type === "adjustment") {
         return {
-            utorid: formData.utorid,
-            amount: parseFloat(formData.amount),
+            utorid: formData.utorid?.trim(),
+            amount: Number(formData.amount),
             remark: formData.remark,
             relatedId: formData.relatedId,
             promotionIds: formData.promotionIds,
@@ -33,8 +33,8 @@ const createData = (formData) => {
 
     if (formData.type === "transfer") {
         return {
-            receiverUserId: parseFloat(formData.receiverUserId),
-            amount: parseFloat(formData.amount),
+            receiverUserId: Number(formData.receiverUserId),
+            amount: Number(formData.amount),
             remark: formData.remark,
             type: formData.type,
         }
@@ -42,7 +42,7 @@ const createData = (formData) => {
 
     if (formData.type === "redemption") {
         return {
-            amount: parseFloat(formData.amount), remark: formData.remark, type: formData.type,
+            amount: Number(formData.amount), remark: formData.remark, type: formData.type,
         }
     }
     if (formData.type === "processRedemption") {
@@ -76,6 +76,22 @@ export function CreateTransaction({title, onClose, type, onSuccess}) {
         setLoading(true);
         setError('');
         const requestBody = createData(formData);
+        // basic client validation to avoid silent 400s
+        if (requestBody?.utorid === "" || requestBody?.utorid === undefined) {
+            setLoading(false);
+            setError("UTORid is required.");
+            return;
+        }
+        if (formData.type === "purchase" && (!Number.isFinite(requestBody.spent) || requestBody.spent <= 0)) {
+            setLoading(false);
+            setError("Spent must be a positive number.");
+            return;
+        }
+        if (formData.type === "adjustment" && !Number.isFinite(requestBody.amount)) {
+            setLoading(false);
+            setError("Amount must be a number.");
+            return;
+        }
         try {
             let result;
             if (formData.type === "purchase" || formData.type === "adjustment") {
@@ -96,7 +112,8 @@ export function CreateTransaction({title, onClose, type, onSuccess}) {
             await onSuccess()
 
         } catch (error) {
-            setError(error.message || "Failed to Create Transaction");
+            const msg = error?.response?.data?.message || error?.response?.data?.error || error.message || "Failed to Create Transaction";
+            setError(msg);
             console.error(error)
         } finally {
             setLoading(false);
