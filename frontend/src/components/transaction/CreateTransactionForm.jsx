@@ -74,7 +74,8 @@ function CreateProcessRedemption({setFormData, formData, onSubmit, type}) {
                     onChange={(e) => setFormData({...formData, transactionId: e.target.value})}
                     required
                 />
-
+            </div>
+            <div className="p-4">
                 <label className="text-xs text-slate-500 mb-1.5 block">
                     Redemption Status
                 </label>
