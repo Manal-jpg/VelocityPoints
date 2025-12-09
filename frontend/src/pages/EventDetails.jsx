@@ -15,6 +15,9 @@ export default function EventDetails() {
 
   const [addUtorid, setAddUtorid] = useState("");
   const [adding, setAdding] = useState(false);
+  const [addOrganizerUtorid, setAddOrganizerUtorid] = useState("");
+  const [addingOrganizer, setAddingOrganizer] = useState(false);
+  const [organizerError, setOrganizerError] = useState("");
   const [awardAll, setAwardAll] = useState(true);
   const [awardUtorid, setAwardUtorid] = useState("");
   const [awardPoints, setAwardPoints] = useState("");
@@ -195,6 +198,53 @@ export default function EventDetails() {
     }
   };
 
+  const handleAddOrganizer = async () => {
+    if (!addOrganizerUtorid.trim()) {
+      setOrganizerError("Enter a UTORid.");
+      return;
+    }
+    try {
+      setAddingOrganizer(true);
+      setOrganizerError("");
+      const res = await api.post(`/events/${id}/organizers`, {
+        utorid: addOrganizerUtorid.trim(),
+      });
+      const organizers = res.data?.organizers || [];
+      setEvent((prev) => ({
+        ...prev,
+        organizers,
+      }));
+      setAddOrganizerUtorid("");
+    } catch (err) {
+      console.error("ADD ORGANIZER ERROR:", err);
+      setOrganizerError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "Unable to add organizer."
+      );
+    } finally {
+      setAddingOrganizer(false);
+    }
+  };
+
+  const handleRemoveGuest = async (userId) => {
+    try {
+      await api.delete(`/events/${id}/guests/${userId}`);
+      setEvent((prev) => ({
+        ...prev,
+        guests: (prev.guests || []).filter((g) => g.id !== userId),
+        numGuests: (prev.numGuests || prev.guests?.length || 1) - 1,
+      }));
+    } catch (err) {
+      console.error("REMOVE GUEST ERROR:", err);
+      alert(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "Unable to remove guest."
+      );
+    }
+  };
+
   const handleDelete = async () => {
     if (!window.confirm("Delete this event? This cannot be undone.")) return;
     try {
@@ -324,19 +374,57 @@ export default function EventDetails() {
             </div>
           </div>
 
-          <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-sm text-slate-700">
-            <p className="text-xs text-slate-500 mb-1">Organizers</p>
-            <p className="font-semibold text-slate-900">
-              {event.organizers?.map((o) => o.name).join(", ") || "None"}
-            </p>
+        <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-sm text-slate-700">
+          <p className="text-xs text-slate-500 mb-1">Organizers</p>
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {event.organizers?.length
+                ? event.organizers.map((o) => (
+                    <span
+                      key={o.id}
+                      className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 text-sm text-slate-800"
+                    >
+                      {o.name} ({o.utorid})
+                    </span>
+                  ))
+                : "None"}
+            </div>
+            {(isManagerPlus || isOrganizer) && (
+              <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                <input
+                  type="text"
+                  placeholder="Organizer UTORid"
+                  value={addOrganizerUtorid}
+                  onChange={(e) => setAddOrganizerUtorid(e.target.value)}
+                  className="border border-slate-200 rounded-lg px-3 py-2 text-sm flex-1"
+                />
+                <button
+                  onClick={handleAddOrganizer}
+                  disabled={addingOrganizer}
+                  className="px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm font-medium shadow-sm hover:bg-emerald-600 disabled:opacity-50"
+                >
+                  {addingOrganizer ? "Adding..." : "Add Organizer"}
+                </button>
+              </div>
+            )}
+            {organizerError && (
+              <p className="text-xs text-red-600">{organizerError}</p>
+            )}
           </div>
+        </div>
         </div>
 
         {(isManagerPlus || isOrganizer) && (
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
-            <h3 className="text-lg font-semibold text-slate-900 mb-3">
-              Add Guest to Event
-            </h3>
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-slate-900">
+                Guests
+              </h3>
+              <p className="text-xs text-slate-500">
+                {event.numGuests ?? event.guests?.length ?? 0} attending
+              </p>
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
@@ -352,6 +440,36 @@ export default function EventDetails() {
               >
                 {adding ? "Adding..." : "Add Guest"}
               </button>
+            </div>
+
+            <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl">
+              {(event.guests || []).map((g) => (
+                <div
+                  key={g.id}
+                  className="flex items-center justify-between px-3 py-2 text-sm"
+                >
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-slate-900">
+                      {g.name || g.utorid}
+                    </span>
+                    <span className="text-xs text-slate-500">#{g.id}</span>
+                  </div>
+                  {isManagerPlus && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveGuest(g.id)}
+                      className="text-xs text-red-600 hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
+              {(event.guests || []).length === 0 && (
+                <div className="px-3 py-2 text-xs text-slate-500">
+                  No guests yet.
+                </div>
+              )}
             </div>
           </div>
         )}
