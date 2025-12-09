@@ -1,6 +1,8 @@
 // common elements utorid, promotionids, remark
 // transfer and redeem are the same type, amount, remark
 
+import {CircleCheck} from "lucide-react";
+
 function CreateTransferRedemptionForm({setFormData, formData, onSubmit, type}) {
     return (<form id="transaction-form" onSubmit={(e) => {
         e.preventDefault();
@@ -53,12 +55,59 @@ function CreateTransferRedemptionForm({setFormData, formData, onSubmit, type}) {
     </form>)
 }
 
+function CreateProcessRedemption({setFormData, formData, onSubmit, type}) {
+    return (<form id="transaction-form" onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit();
+        }}>
+
+            <div className="p-4">
+                <label className="text-xs text-slate-500 mb-1.5 block">
+                    Transaction ID
+                </label>
+
+                <input
+                    type="number"
+                    className="w-full px-3 py-2 border border-slate-100 rounded-lg"
+                    placeholder="Enter Transaction ID"
+                    value={formData.transactionId}
+                    onChange={(e) => setFormData({...formData, transactionId: e.target.value})}
+                    required
+                />
+
+                <label className="text-xs text-slate-500 mb-1.5 block">
+                    Redemption Status
+                </label>
+
+                <div className="flex items-center gap-3 border border-slate-100 rounded-lg p-3">
+                    {(<CircleCheck size={20}/>)}
+                    <select>
+                        <option>Processed</option>
+                        <option disabled>Not Processed</option>
+
+                    </select>
+
+
+                </div>
+
+            </div>
+        </form>
+
+    )
+
+
+}
+
 export function CreateTransactionForm({type, setFormData, formData, onSubmit}) {
     if (type === "redemption" || type === "transfer") {
-        return (
+        return (<CreateTransferRedemptionForm setFormData={setFormData} onSubmit={onSubmit} formData={formData}
+                                              type={type}/>
 
-            <CreateTransferRedemptionForm setFormData={setFormData} onSubmit={onSubmit} formData={formData}
-                                          type={type}/>)
+        )
+    }
+    if (type === "processRedemption") {
+        return (<CreateProcessRedemption setFormData={setFormData} onSubmit={onSubmit} formData={formData}
+                                         type={type}/>)
     }
 
     return (<form id="transaction-form" onSubmit={(e) => {
@@ -165,24 +214,24 @@ export function CreateTransactionForm({type, setFormData, formData, onSubmit}) {
 
                     {/* Show added promotion IDs */}
                     {formData.promotionIds.length > 0 && (<div className="flex flex-wrap gap-2">
-                            {formData.promotionIds.map(id => (<span
-                                    key={id}
-                                    className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-sm"
-                                >
+                        {formData.promotionIds.map(id => (<span
+                            key={id}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-sm"
+                        >
                                 #{id}
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setFormData(prev => ({
-                                                ...prev, promotionIds: prev.promotionIds.filter(i => i !== id)
-                                            }));
-                                        }}
-                                        className="text-emerald-600 hover:text-emerald-800 font-bold"
-                                    >
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setFormData(prev => ({
+                                        ...prev, promotionIds: prev.promotionIds.filter(i => i !== id)
+                                    }));
+                                }}
+                                className="text-emerald-600 hover:text-emerald-800 font-bold"
+                            >
                                     ×
                                 </button>
                             </span>))}
-                        </div>)}
+                    </div>)}
 
 
                 </div>

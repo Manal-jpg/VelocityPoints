@@ -1,6 +1,6 @@
 import {Plus} from "lucide-react";
 
-export function CreateTransactionButtons({ hasPermissions, setShowCreateRedemption,  setShowCreateTransfer, setShowCreatePurchase, setShowCreateAdjustment}) {
+export function CreateTransactionButtons({ hasPermissions, setShowCreateRedemption,  setShowCreateTransfer, setShowCreatePurchase, setShowCreateAdjustment, setShowProcessRedemption}) {
     return (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             {/*Top bar */}
@@ -46,6 +46,16 @@ export function CreateTransactionButtons({ hasPermissions, setShowCreateRedempti
                                 className={"flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition"}>
                             <Plus size={16}
                             /> Adjustment
+                        </button>
+                    </>
+                )}
+
+                {hasPermissions(["manager", "superuser", "cashier"]) && (
+                    <>
+                        <button onClick={() => setShowProcessRedemption(true)}
+                                className={"flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition"}>
+                            <Plus size={16}
+                            /> Process Redemption
                         </button>
                     </>
                 )}
