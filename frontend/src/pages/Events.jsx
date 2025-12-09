@@ -29,6 +29,12 @@ export default function Events() {
     () => ["manager", "superuser"].includes(user?.role?.toLowerCase()),
     [user]
   );
+  const isOrganizer = useMemo(() => {
+    // assume backend includes organizers filter by auth; for frontend, allow organizer to see unpublished
+    return Array.isArray(user?.roles)
+      ? user.roles.some((r) => String(r).toLowerCase() === "organizer")
+      : false;
+  }, [user]);
 
   async function loadEvents() {
     try {
@@ -44,7 +50,7 @@ export default function Events() {
       if (timeFilter === "upcoming") params.started = false;
       if (timeFilter === "past") params.ended = true;
 
-      if (isManagerPlus && publishedFilter !== "all") {
+      if ((isManagerPlus || isOrganizer) && publishedFilter !== "all") {
         params.published = publishedFilter === "published";
       }
 
