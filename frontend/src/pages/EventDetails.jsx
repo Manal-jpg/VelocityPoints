@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { AppLayout } from "../components/layout/Layout";
 import { api } from "../api/client";
 import { useAuth } from "../hooks/useAuth";
@@ -7,6 +7,7 @@ import { useAuth } from "../hooks/useAuth";
 export default function EventDetails() {
   const { id } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -195,6 +196,21 @@ export default function EventDetails() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this event? This cannot be undone.")) return;
+    try {
+      await api.delete(`/events/${id}`);
+      navigate("/events", { replace: true });
+    } catch (err) {
+      console.error("DELETE EVENT ERROR:", err);
+      alert(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          "Unable to delete event."
+      );
+    }
+  };
+
   if (loading) {
     return (
       <AppLayout title="Event Details">
@@ -232,6 +248,15 @@ export default function EventDetails() {
               >
                 Edit Event
               </Link>
+            )}
+            {(isManagerPlus || isOrganizer) && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 text-red-700 text-sm font-medium shadow-sm hover:bg-red-50"
+              >
+                Delete
+              </button>
             )}
 
             {!isManagerPlus && !isOrganizer && (
