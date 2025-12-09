@@ -33,7 +33,7 @@ export function CreateTransactionButtons({
                     </>)}
 
                 {/*cashier and above permissions*/}
-                {hasPermissions(["cashier"]) && (<>
+                {hasPermissions(["cashier", "manager", "superuser"]) && (<>
                         <button onClick={() => setShowCreatePurchase(true)}
                                 className={"flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition"}>
                             <Plus size={16}
@@ -50,7 +50,7 @@ export function CreateTransactionButtons({
                         </button>
                     </>)}
 
-                {hasPermissions(["cashier"]) && (<>
+                {hasPermissions(["cashier", "manager", "superuser"]) && (<>
                         <button onClick={() => setShowProcessRedemption(true)}
                                 className={"flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition"}>
                             <Plus size={16}
