@@ -1976,6 +1976,7 @@ app.get(
     }
 
     const isManagerPlus = ["manager", "superuser"].includes(req.auth.role);
+    const currentUserId = Number(req.auth?.sub ?? req.auth?.id);
 
     if (started !== undefined && ended !== undefined) {
       return res.status(400).json({ error: "Bad Request" });
@@ -1999,7 +2000,12 @@ app.get(
         where.published = toBool(published);
       }
     } else {
-      where.published = true;
+      // Regular/cashier: show published plus any events they organize
+      const or = [{ published: true }];
+      if (Number.isInteger(currentUserId)) {
+        or.push({ organizers: { some: { userId: currentUserId } } });
+      }
+      where.OR = or;
     }
 
     try {
