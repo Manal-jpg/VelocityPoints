@@ -23,18 +23,22 @@ export default function Events() {
   const limit = 6;
 
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, activeRole } = useAuth();
 
+  const role = useMemo(
+    () => (activeRole || user?.role || "regular").toLowerCase(),
+    [activeRole, user]
+  );
   const isManagerPlus = useMemo(
-    () => ["manager", "superuser"].includes(user?.role?.toLowerCase()),
-    [user]
+    () => ["manager", "superuser"].includes(role),
+    [role]
   );
   const isOrganizer = useMemo(() => {
-    // assume backend includes organizers filter by auth; for frontend, allow organizer to see unpublished
     return Array.isArray(user?.roles)
       ? user.roles.some((r) => String(r).toLowerCase() === "organizer")
       : false;
   }, [user]);
+  const canCreate = ["manager", "superuser", "organizer"].includes(role);
 
   async function loadEvents() {
     try {
@@ -96,12 +100,14 @@ export default function Events() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Events</h2>
 
-          <Link
-            to="/manager/events/new"
-            className="bg-[#00a862] text-white px-4 py-2 rounded-lg hover:bg-[#008551]"
-          >
-            + Create Event
-          </Link>
+          {canCreate && (
+            <Link
+              to="/manager/events/new"
+              className="bg-[#00a862] text-white px-4 py-2 rounded-lg hover:bg-[#008551]"
+            >
+              + Create Event
+            </Link>
+          )}
         </div>
 
         {/* FILTERS */}
