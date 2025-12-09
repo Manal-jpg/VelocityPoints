@@ -142,16 +142,22 @@ function RegularDashboard({ user }) {
               </Link>
             </div>
             <div className="space-y-3 text-sm text-emerald-900">
-              <div className="bg-white border border-emerald-100 rounded-xl p-3 shadow-xs">
+              <Link
+                to="/events"
+                className="block bg-white border border-emerald-100 rounded-xl p-3 shadow-xs hover:border-emerald-200 hover:shadow-sm transition"
+              >
                 <p className="font-semibold">Events</p>
                 <p className="text-xs text-emerald-700">
                   Browse and RSVP to events.
                 </p>
-              </div>
-              <div className="bg-white border border-emerald-100 rounded-xl p-3 shadow-xs">
+              </Link>
+              <Link
+                to="/promotions"
+                className="block bg-white border border-emerald-100 rounded-xl p-3 shadow-xs hover:border-emerald-200 hover:shadow-sm transition"
+              >
                 <p className="font-semibold">Promotions</p>
                 <p className="text-xs text-emerald-700">Check active offers.</p>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
