@@ -23,6 +23,13 @@ function RegularDashboard({ user }) {
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const formatDate = (value) => {
+    if (!value) return "—";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "—";
+    return d.toLocaleString();
+  };
+
   useEffect(() => {
     let ignore = false;
     const load = async () => {
@@ -113,7 +120,7 @@ function RegularDashboard({ user }) {
                         {tx.type}
                       </span>
                       <span className="text-xs text-slate-500">
-                        {new Date(tx.createdAt).toLocaleString()}
+                        {formatDate(tx.createdAt || tx.created_at)}
                       </span>
                     </div>
                   </div>
