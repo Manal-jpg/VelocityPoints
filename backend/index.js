@@ -379,6 +379,7 @@ app.get(
           remark: t.remark,
           createdBy: t.createdBy.utorid,
           createdAt: t.createdAt,
+          processed: t.processed,
         };
 
         if (t.type === "purchase") {
