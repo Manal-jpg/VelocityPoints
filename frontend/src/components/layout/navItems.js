@@ -97,11 +97,6 @@ export const getNavItems = (user, activeRole) => {
     });
     add({ icon: Tag, label: "Promotions", path: "/manager/promotions" });
     add({ icon: CalendarRange, label: "Events", path: "/events" });
-    add({
-      icon: PlusCircle,
-      label: "Create Event",
-      path: "/manager/events/new",
-    });
   }
 
   // Universal
