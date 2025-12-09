@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Gift,
@@ -21,6 +22,13 @@ function RegularDashboard({ user }) {
   );
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const formatDate = (value) => {
+    if (!value) return "—";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "—";
+    return d.toLocaleString();
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -55,27 +63,27 @@ function RegularDashboard({ user }) {
               {(user?.points ?? 0).toLocaleString()}
             </h1>
             <div className="flex flex-wrap gap-2 mt-2">
-              <a
-                href="/transfer"
+              <Link
+                to="/transactions"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <ArrowUpRight size={16} />
                 Transfer
-              </a>
-              <a
-                href="/redemptions/request"
+              </Link>
+              <Link
+                to="/transactions"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <Gift size={16} />
                 Redeem
-              </a>
-              <a
-                href="/events"
+              </Link>
+              <Link
+                to="/events"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <CalendarRange size={16} />
                 Events
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -86,12 +94,12 @@ function RegularDashboard({ user }) {
               <p className="text-sm font-semibold text-slate-900">
                 Recent Activity
               </p>
-              <a
-                href="/transactions"
+              <Link
+                to="/transactions"
                 className="text-xs text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1"
               >
                 See all <ArrowRight size={14} />
-              </a>
+              </Link>
             </div>
             {loading && <p className="text-sm text-slate-600">Loading...</p>}
             {!loading && !recent.length && (
@@ -112,7 +120,7 @@ function RegularDashboard({ user }) {
                         {tx.type}
                       </span>
                       <span className="text-xs text-slate-500">
-                        {new Date(tx.createdAt).toLocaleString()}
+                        {formatDate(tx.createdAt || tx.created_at)}
                       </span>
                     </div>
                   </div>
@@ -133,24 +141,30 @@ function RegularDashboard({ user }) {
               <p className="text-sm font-semibold text-emerald-900">
                 Your Events
               </p>
-              <a
-                href="/events"
+              <Link
+                to="/events"
                 className="text-xs text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1"
               >
                 See all <ArrowRight size={14} />
-              </a>
+              </Link>
             </div>
             <div className="space-y-3 text-sm text-emerald-900">
-              <div className="bg-white border border-emerald-100 rounded-xl p-3 shadow-xs">
+              <Link
+                to="/events"
+                className="block bg-white border border-emerald-100 rounded-xl p-3 shadow-xs hover:border-emerald-200 hover:shadow-sm transition"
+              >
                 <p className="font-semibold">Events</p>
                 <p className="text-xs text-emerald-700">
                   Browse and RSVP to events.
                 </p>
-              </div>
-              <div className="bg-white border border-emerald-100 rounded-xl p-3 shadow-xs">
+              </Link>
+              <Link
+                to="/promotions"
+                className="block bg-white border border-emerald-100 rounded-xl p-3 shadow-xs hover:border-emerald-200 hover:shadow-sm transition"
+              >
                 <p className="font-semibold">Promotions</p>
                 <p className="text-xs text-emerald-700">Check active offers.</p>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
@@ -172,31 +186,31 @@ function CashierDashboard() {
               Process transactions and redemptions quickly.
             </p>
             <div className="flex flex-wrap gap-2 mt-2">
-              <a
-                href="/cashier/transactions/new"
+              <Link
+                to="/transactions"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <CreditCard size={16} /> New Transaction
-              </a>
-              <a
-                href="/cashier/redemptions/process"
+              </Link>
+              <Link
+                to="/transactions"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <Gift size={16} /> Process Redemption
-              </a>
-              <a
-                href="/qr"
+              </Link>
+              <Link
+                to="/qr"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <QrCode size={16} /> Scan User
-              </a>
+              </Link>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a
-            href="/cashier/transactions/new"
+          <Link
+            to="/transactions"
             className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition flex flex-col gap-2"
           >
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">
@@ -211,9 +225,9 @@ function CashierDashboard() {
             <p className="text-sm text-slate-600">
               Start a new purchase or adjustment.
             </p>
-          </a>
-          <a
-            href="/cashier/redemptions/process"
+          </Link>
+          <Link
+            to="/transactions"
             className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition flex flex-col gap-2"
           >
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">
@@ -228,7 +242,7 @@ function CashierDashboard() {
             <p className="text-sm text-slate-600">
               Scan and complete pending redemptions.
             </p>
-          </a>
+          </Link>
           <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 shadow-sm flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-emerald-900">
@@ -271,31 +285,31 @@ function ManagerDashboard() {
               Stay on top of users, events, and promotions.
             </p>
             <div className="flex flex-wrap gap-2 mt-2">
-              <a
-                href="/manager/users"
+              <Link
+                to="/manager/users"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <Users size={16} /> Manage Users
-              </a>
-              <a
-                href="/manager/promotions"
+              </Link>
+              <Link
+                to="/manager/promotions"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <Gift size={16} /> Promotions
-              </a>
-              <a
-                href="/events"
+              </Link>
+              <Link
+                to="/events"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <CalendarRange size={16} /> Events
-              </a>
+              </Link>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a
-            href="/manager/users"
+          <Link
+            to="/manager/users"
             className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition flex flex-col gap-2"
           >
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">
@@ -310,9 +324,9 @@ function ManagerDashboard() {
             <p className="text-sm text-slate-600">
               Verify, promote, and review accounts.
             </p>
-          </a>
-          <a
-            href="/manager/promotions"
+          </Link>
+          <Link
+            to="/manager/promotions"
             className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition flex flex-col gap-2"
           >
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">
@@ -327,9 +341,9 @@ function ManagerDashboard() {
             <p className="text-sm text-slate-600">
               Create and edit active offers.
             </p>
-          </a>
-          <a
-            href="/events"
+          </Link>
+          <Link
+            to="/events"
             className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition flex flex-col gap-2"
           >
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">
@@ -344,7 +358,7 @@ function ManagerDashboard() {
             <p className="text-sm text-slate-600">
               Manage events, guests, and awards.
             </p>
-          </a>
+          </Link>
         </div>
       </div>
     </AppLayout>
