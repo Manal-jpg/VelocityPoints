@@ -9,6 +9,7 @@ export default function PromotionsUserPage() {
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(1);
   const [nameFilter, setNameFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const limit = 6;
@@ -25,6 +26,7 @@ export default function PromotionsUserPage() {
           page,
           limit,
           name: nameFilter || undefined,
+          type: typeFilter === "all" ? undefined : typeFilter,
         });
         if (!ignore) {
           setPromos(data.results || []);
@@ -41,7 +43,7 @@ export default function PromotionsUserPage() {
     return () => {
       ignore = true;
     };
-  }, [page, nameFilter]);
+  }, [page, nameFilter, typeFilter]);
 
   const totalPages = Math.max(1, Math.ceil(count / limit));
 
@@ -70,6 +72,18 @@ export default function PromotionsUserPage() {
                 setNameFilter(e.target.value);
               }}
             />
+            <select
+              className="border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white shadow-sm"
+              value={typeFilter}
+              onChange={(e) => {
+                setPage(1);
+                setTypeFilter(e.target.value);
+              }}
+            >
+              <option value="all">All types</option>
+              <option value="automatic">Automatic</option>
+              <option value="onetime">One-time</option>
+            </select>
           </div>
         </div>
 
