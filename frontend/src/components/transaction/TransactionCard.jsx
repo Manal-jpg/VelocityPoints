@@ -51,7 +51,7 @@ export function TransactionCard({
       <AlertTriangle size={11}/>
       SUSPICIOUS
     </span>)}
-                    {processed === false && (<span
+                    {processed === false && type === "redemption" && (<span
                         className="px-2 py-0.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-semibold">
       PENDING
     </span>)}
