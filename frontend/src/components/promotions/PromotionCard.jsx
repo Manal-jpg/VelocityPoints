@@ -14,6 +14,9 @@ export default function PromotionCard({ promo, onClick }) {
 
   const start = new Date(startTime);
   const end = new Date(endTime);
+  const now = new Date();
+  const isActive = start <= now && end > now;
+  const isUpcoming = start > now;
 
   const typeLabel = type === "automatic" ? "Automatic" : "One-time";
   const accentClass =
@@ -41,11 +44,23 @@ export default function PromotionCard({ promo, onClick }) {
             </h3>
             <p className="text-sm text-slate-600 line-clamp-2">{description}</p>
           </div>
-          <span
-            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border bg-white ${accentClass}`}
-          >
-            {typeLabel}
-          </span>
+          <div className="flex flex-col items-end gap-1">
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border bg-white ${accentClass}`}
+            >
+              {typeLabel}
+            </span>
+            {isActive && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold border bg-green-50 text-green-700 border-green-100">
+                Active
+              </span>
+            )}
+            {isUpcoming && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold border bg-amber-50 text-amber-700 border-amber-100">
+                Upcoming
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2 text-sm text-slate-700">
