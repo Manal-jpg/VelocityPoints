@@ -80,17 +80,15 @@ function CreateProcessRedemption({setFormData, formData, onSubmit, type}) {
                     Redemption Status
                 </label>
 
-                <div className="flex items-center gap-3 border border-slate-100 rounded-lg p-3">
-                    {(<CircleCheck size={20}/>)}
-                    <select>
+                <div className="flex items-center gap-3">
+                    <CircleCheck size={20} className="text-emerald-500"/>
+                    <select
+                        className="flex-1 w-full px-3 py-2 border border-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
                         <option>Processed</option>
                         <option disabled>Not Processed</option>
-
                     </select>
-
-
                 </div>
-
             </div>
         </form>
 
