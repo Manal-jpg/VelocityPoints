@@ -378,6 +378,7 @@ app.get(
           promotionIds: promotionIds,
           remark: t.remark,
           createdBy: t.createdBy.utorid,
+          createdAt: t.createdAt,
         };
 
         if (t.type === "purchase") {
