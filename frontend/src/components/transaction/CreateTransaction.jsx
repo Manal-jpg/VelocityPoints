@@ -1,7 +1,12 @@
 import {X} from "lucide-react";
 import {CreateTransactionForm} from "./CreateTransactionForm";
 import {useState} from "react";
-import {createRedemptionTransaction, createTransaction, createTransferTransaction} from "../../api/transactions.js";
+import {
+    createRedemptionTransaction,
+    createTransaction,
+    createTransferTransaction,
+    processRedemptionTransaction
+} from "../../api/transactions.js";
 
 const createData = (formData) => {
     if (formData.type === "purchase") {
@@ -40,6 +45,11 @@ const createData = (formData) => {
             amount: parseFloat(formData.amount), remark: formData.remark, type: formData.type,
         }
     }
+    if (formData.type === "processRedemption") {
+        return {
+            processed: true, transactionId: formData.transactionId
+        }
+    }
 
 }
 
@@ -56,7 +66,9 @@ export function CreateTransaction({title, onClose, type, onSuccess}) {
         relatedId: '',
         type: type,
         currentPromoId: '',
-        receiverUserId: ''
+        receiverUserId: '',
+        processed: true,
+        transactionId: ''
 
     });
 
@@ -75,6 +87,9 @@ export function CreateTransaction({title, onClose, type, onSuccess}) {
             }
             if (formData.type === "redemption") {
                 result = await createRedemptionTransaction(requestBody)
+            }
+            if (formData.type === "processRedemption") {
+                result = await processRedemptionTransaction(requestBody, requestBody.transactionId)
             }
             console.log("Transaction created", result)
             onClose();

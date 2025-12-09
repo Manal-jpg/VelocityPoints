@@ -58,7 +58,7 @@ export function TransactionList({transactions, setSelectedTransaction, hasPermis
                         type={t.type}
                         borderColor={getBorderColor(t.type)}
                         suspicious={t.suspicious}
-                        processed={t.processed}
+                        processed={t?.processed}
                         transaction={t}
                         onClick={() => setSelectedTransaction(t)}
                         hasPermissions={hasPermissions}

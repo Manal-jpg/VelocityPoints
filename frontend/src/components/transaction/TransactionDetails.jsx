@@ -165,7 +165,7 @@ export function TransactionDetails({transaction, onClose, hasPermissions, onRefr
                         <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
                             <User size={20} className="text-slate-400 mt-0.5"/>
                             <div>
-                                <p className="text-xs text-slate-500 mb-1">Customer</p>
+                                <p className="text-xs text-slate-500 mb-1">{transaction.type === "transfer" ? "Sender" : "Customer"}</p>
                                 <p className="text-base text-slate-900">{transaction.utorid}</p>
                             </div>
                         </div>
@@ -180,6 +180,23 @@ export function TransactionDetails({transaction, onClose, hasPermissions, onRefr
                         {/*        </p>*/}
                         {/*    </div>*/}
                         {/*</div>*/}
+                        {}
+                        {transaction.type !== "purchase" && transaction?.relatedId && (
+                            <div className="flex gap-3 border border-slate-100 rounded-lg p-3">
+                                {transaction.type !== "adjustment" ? (
+                                    <User size={20} className="text-slate-400 mt-0.5"/>
+                                ) : (
+                                    <Hash size={20} className="text-slate-400 mt-0.5"/>
+                                )}
+
+
+                                <div>
+                                    <p className="text-xs text-slate-500 mb-1">{transaction.type === "transfer" ? "Recipient" : transaction.type === "redemption" ? "Processed By ID" : "Related Transaction ID"}</p>
+                                    <p className="text-base text-slate-900">{transaction.type === "transfer" ? transaction.relatedUtorid : transaction?.relatedId}</p>
+                                </div>
+                            </div>
+                        )}
+
 
                         {/* Amount Spent (Purchases Only)*/}
                         {transaction.type === "purchase" && (

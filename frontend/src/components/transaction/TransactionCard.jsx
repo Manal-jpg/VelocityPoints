@@ -1,7 +1,17 @@
 import {AlertTriangle, ArrowRightLeft, Calendar, ChevronRight, Gift, Settings, ShoppingCart} from "lucide-react";
 
 export function TransactionCard({
-                                    id, title, amount, type, borderColor, suspicious, processed, onClick, transaction, hasPermissions, user
+                                    id,
+                                    title,
+                                    amount,
+                                    type,
+                                    borderColor,
+                                    suspicious,
+                                    processed,
+                                    onClick,
+                                    transaction,
+                                    hasPermissions,
+                                    user
                                 }) {
 
     const renderIcon = (type) => {
@@ -12,8 +22,12 @@ export function TransactionCard({
         if (type === "adjustment") return <Settings size={16}/>;
         return <ShoppingCart size={16}/>
     }
+    // if (hasPermissions("cashier")) {
+    //     return (<> </>)
+    // }
 
-    return (<div onClick={onClick}
+    return (
+        <div onClick={onClick}
                  className={"bg-white rounded-lg p-6 border-l-4 border border-slate-100 hover:shadow-lg transition-all cursor-pointer"}
                  style={{borderLeftColor: borderColor}}
     >
@@ -37,7 +51,7 @@ export function TransactionCard({
       <AlertTriangle size={11}/>
       SUSPICIOUS
     </span>)}
-                    {processed === false && (<span
+                    {processed === false && type === "redemption" && (<span
                         className="px-2 py-0.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-semibold">
       PENDING
     </span>)}
@@ -48,7 +62,6 @@ export function TransactionCard({
                 <p className={"text-sm  text-slate-500 mb-1"}>
                     {["redemption", "purchase", "adjustment"].includes(type) && `Customer: ${transaction.utorid || user.utorid}`}
                 </p>
-
 
 
                 {type === "transfer" && hasPermissions(["superuser", "manager"]) && (<div>
@@ -93,6 +106,8 @@ export function TransactionCard({
 
         {/* Card content will go here */}
 
-    </div>);
+    </div>
+
+    );
 }
 
