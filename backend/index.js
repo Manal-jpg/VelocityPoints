@@ -1199,20 +1199,25 @@ app.post(
         remark = "",
       } = req.body || {};
 
-      if (!utorid || !type) {
+      if (!type) {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
-      if (!isUtorid(utorid)) {
-        return res.status(400).json({ message: "Invalid UTORid" });
-      }
-
-      if (type !== "purchase" && type !== "adjustment") {
+      if (!["purchase", "adjustment", "redemption"].includes(type)) {
         return res.status(400).json({ message: "Bad Request" });
       }
 
+      let targetUtorid = utorid;
+      if (!targetUtorid && type === "redemption" && req.me?.utorid) {
+        targetUtorid = req.me.utorid;
+      }
+
+      if (!targetUtorid || !isUtorid(targetUtorid)) {
+        return res.status(400).json({ message: "Invalid UTORid" });
+      }
+
       const customer = await prisma.user.findUnique({
-        where: { utorid: String(utorid).trim() },
+        where: { utorid: String(targetUtorid).trim() },
       });
       if (!customer) {
         return res.status(404).json({ message: "User not found" });
@@ -1436,6 +1441,46 @@ app.post(
           relatedId: Number(relatedId),
           remark: String(remark ?? ""),
           promotionIds: [],
+          createdBy: creator.utorid,
+        });
+      }
+
+      if (type === "redemption") {
+        const redeemAmount = Number(amount);
+        if (!Number.isInteger(redeemAmount) || redeemAmount <= 0) {
+          return res.status(400).json({ message: "Invalid amount" });
+        }
+        if (!customer.verified) {
+          return res.status(403).json({ error: "User not verified" });
+        }
+        if (customer.points < redeemAmount) {
+          return res.status(400).json({ error: "Insufficient points" });
+        }
+
+        const transaction = await prisma.transaction.create({
+          data: {
+            type: "redemption",
+            amount: -redeemAmount,
+            redeemed: redeemAmount,
+            remark: String(remark ?? ""),
+            userId: customer.id,
+            createdById: creator.id,
+            processed: false,
+          },
+        });
+
+        sendEmailIfConfigured({
+          subject: "Redemption Requested",
+          text: `${customer.utorid} requested a redemption of ${redeemAmount} points. Pending processing.`,
+        }).catch(() => {});
+
+        return res.status(201).json({
+          id: transaction.id,
+          utorid: customer.utorid,
+          type: "redemption",
+          processedBy: null,
+          amount: redeemAmount,
+          remark: String(remark ?? ""),
           createdBy: creator.utorid,
         });
       }
