@@ -143,22 +143,20 @@ export function CreateTransactionForm({type, setFormData, formData, onSubmit}) {
                            className={"flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"}
                            onChange={(e) => setFormData({...formData, currentPromoId: e.target.value})}
                     />
-                    <button className={"px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition"}
+                    <button
+                        type="button"
+                        className={"px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition"}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            const promoid = parseInt(formData.currentPromoId, 10);
+                            if (!isNaN(promoid) && !formData.promotionIds.includes(promoid)) {
+                                const newpromotionIds = [...formData.promotionIds, promoid];
+                                setFormData({
+                                    ...formData, promotionIds: newpromotionIds,
+                                });
+                            }
 
-                            onClick={() => {
-                                const promoid = parseInt(formData.currentPromoId, 10)
-                                console.log(promoid)
-                                if (!isNaN(promoid) && !formData.promotionIds.includes(promoid)) {
-                                    console.log(!formData.promotionIds.includes(formData.currentPromoId))
-                                    const newpromotionIds = [...formData.promotionIds, promoid];
-
-                                    setFormData({
-                                        ...formData, promotionIds: newpromotionIds,
-                                    })
-
-                                }
-
-                            }}>
+                        }}>
 
 
                         Add

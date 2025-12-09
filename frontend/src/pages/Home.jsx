@@ -272,31 +272,31 @@ function ManagerDashboard() {
               Stay on top of users, events, and promotions.
             </p>
             <div className="flex flex-wrap gap-2 mt-2">
-              <a
-                href="/manager/users"
+              <Link
+                to="/manager/users"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <Users size={16} /> Manage Users
-              </a>
-              <a
-                href="/manager/promotions"
+              </Link>
+              <Link
+                to="/manager/promotions"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <Gift size={16} /> Promotions
-              </a>
-              <a
-                href="/events"
+              </Link>
+              <Link
+                to="/events"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition"
               >
                 <CalendarRange size={16} /> Events
-              </a>
+              </Link>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a
-            href="/manager/users"
+          <Link
+            to="/manager/users"
             className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition flex flex-col gap-2"
           >
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">
@@ -311,9 +311,9 @@ function ManagerDashboard() {
             <p className="text-sm text-slate-600">
               Verify, promote, and review accounts.
             </p>
-          </a>
-          <a
-            href="/manager/promotions"
+          </Link>
+          <Link
+            to="/manager/promotions"
             className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition flex flex-col gap-2"
           >
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">
@@ -328,9 +328,9 @@ function ManagerDashboard() {
             <p className="text-sm text-slate-600">
               Create and edit active offers.
             </p>
-          </a>
-          <a
-            href="/events"
+          </Link>
+          <Link
+            to="/events"
             className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition flex flex-col gap-2"
           >
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">
@@ -345,7 +345,7 @@ function ManagerDashboard() {
             <p className="text-sm text-slate-600">
               Manage events, guests, and awards.
             </p>
-          </a>
+          </Link>
         </div>
       </div>
     </AppLayout>
