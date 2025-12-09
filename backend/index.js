@@ -2013,7 +2013,7 @@ app.get(
         where,
         orderBy: { startTime: "asc" },
         include: {
-          _count: { select: { guests: { where: { confirmed: true } } } },
+          _count: { select: { guests: true } }, // count all guests (RSVPs)
         },
       });
 
