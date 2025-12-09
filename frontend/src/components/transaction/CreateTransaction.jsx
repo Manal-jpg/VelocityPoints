@@ -77,7 +77,8 @@ export function CreateTransaction({title, onClose, type, onSuccess}) {
         setError('');
         const requestBody = createData(formData);
         // basic client validation to avoid silent 400s
-        if (requestBody?.utorid === "" || requestBody?.utorid === undefined) {
+        if ((formData.type === "purchase" || formData.type === "adjustment")
+            && (requestBody?.utorid === "" || requestBody?.utorid === undefined)) {
             setLoading(false);
             setError("UTORid is required.");
             return;
@@ -90,6 +91,16 @@ export function CreateTransaction({title, onClose, type, onSuccess}) {
         if (formData.type === "adjustment" && !Number.isFinite(requestBody.amount)) {
             setLoading(false);
             setError("Amount must be a number.");
+            return;
+        }
+        if (formData.type === "redemption" && (!Number.isFinite(requestBody.amount) || requestBody.amount <= 0)) {
+            setLoading(false);
+            setError("Amount must be a positive number.");
+            return;
+        }
+        if (formData.type === "transfer" && (!Number.isFinite(requestBody.amount) || requestBody.amount <= 0)) {
+            setLoading(false);
+            setError("Amount must be a positive number.");
             return;
         }
         try {
