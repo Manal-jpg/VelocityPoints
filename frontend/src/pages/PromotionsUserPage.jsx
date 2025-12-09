@@ -11,7 +11,7 @@ export default function PromotionsUserPage() {
   const [nameFilter, setNameFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const limit = 8;
+  const limit = 6;
   const navigate = useNavigate();
 
   useEffect(() => {

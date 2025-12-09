@@ -7,7 +7,7 @@ export default function PromotionsManagerListPage() {
   const [promos, setPromos] = useState([]);
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const limit = 6;
 
   const [nameFilter, setNameFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");     // automatic | onetime | all

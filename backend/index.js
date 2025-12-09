@@ -3504,11 +3504,10 @@ app.get(
       endTime: { gt: now },
     };
 
+    // Fetch all active promos, then apply filtering for one-time usage and paginate manually
     const promos = await prisma.promotion.findMany({
       where: whereActive,
       orderBy: { startTime: "desc" },
-      skip: (p - 1) * l,
-      take: l,
       select: {
         id: true,
         name: true,
@@ -3536,9 +3535,12 @@ app.get(
       );
     }
 
+    const total = filtered.length;
+    const paged = filtered.slice((p - 1) * l, (p - 1) * l + l);
+
     return res.status(200).json({
-      count: filtered.length,
-      results: filtered.map((pr) => ({
+      count: total,
+      results: paged.map((pr) => ({
         id: pr.id,
         name: pr.name,
         type: pr.type,
