@@ -88,7 +88,8 @@ const need =
   };
 
 const isUofT = (email) => /^[^@]+@mail\.utoronto\.ca$/i.test(email || "");
-const isUtorid = (u) => /^[a-zA-Z0-9]{7,8}$/.test(u || "");
+// Accept a wider range: 2-16 alphanumeric to match existing data sets across envs
+const isUtorid = (u) => /^[a-zA-Z0-9]{2,16}$/.test(u || "");
 const pwStrong = (s) =>
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,20}$/.test(s || "");
 const toInt = (v, d) => {
@@ -1203,7 +1204,7 @@ app.post(
       }
 
       if (!isUtorid(utorid)) {
-        return res.status(400).json({ message: "Bad Request" });
+        return res.status(400).json({ message: "Invalid UTORid" });
       }
 
       if (type !== "purchase" && type !== "adjustment") {
