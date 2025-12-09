@@ -1,6 +1,13 @@
 import {Plus} from "lucide-react";
 
-export function CreateTransactionButtons({ hasPermissions, setShowCreateRedemption,  setShowCreateTransfer, setShowCreatePurchase, setShowCreateAdjustment, setShowProcessRedemption}) {
+export function CreateTransactionButtons({
+                                             hasPermissions,
+                                             setShowCreateRedemption,
+                                             setShowCreateTransfer,
+                                             setShowCreatePurchase,
+                                             setShowCreateAdjustment,
+                                             setShowProcessRedemption
+                                         }) {
     return (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             {/*Top bar */}
@@ -12,7 +19,7 @@ export function CreateTransactionButtons({ hasPermissions, setShowCreateRedempti
             {/*button logic based on user authorization*/}
             {/*user and above permissions*/}
             <div className="flex flex-wrap gap-2">
-                {hasPermissions(["regular", "manager", "cashier", "superuser"]) && (
+                {hasPermissions(["regular"]) && (
                     <>
                         <button onClick={() => setShowCreateRedemption(true)}
                                 className={"flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition"}>
@@ -29,7 +36,7 @@ export function CreateTransactionButtons({ hasPermissions, setShowCreateRedempti
                 )}
 
                 {/*cashier and above permissions*/}
-                {hasPermissions(["manager", "cashier", "superuser"]) && (
+                {hasPermissions(["cashier"]) && (
                     <>
                         <button onClick={() => setShowCreatePurchase(true)}
                                 className={"flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition"}>
