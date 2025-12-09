@@ -57,7 +57,7 @@ export function CreateTransactionButtons({
                     </>
                 )}
 
-                {hasPermissions(["manager", "superuser", "cashier"]) && (
+                {hasPermissions(["cashier"]) && (
                     <>
                         <button onClick={() => setShowProcessRedemption(true)}
                                 className={"flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition"}>
